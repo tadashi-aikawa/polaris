@@ -1,0 +1,26 @@
+version: "3"
+
+tasks:
+  default:
+    - task: help
+
+  help:
+    silent: true
+    cmds:
+      - task -l
+
+  dev:
+    desc: 開発ビルド
+    cmds:
+      - npm run tauri dev
+
+  check:
+    desc: cargo check
+    dir: ./src-tauri
+    cmds:
+      - cargo check
+
+  build:
+    desc: 製品ビルド
+    cmds:
+      - npm run tauri build
