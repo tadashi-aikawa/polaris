@@ -5,15 +5,20 @@ use crate::external::slack;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Response {
+    user: User
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct User {
     real_name: String,
     display_name: String,
     avatar_hash: String,
     image_url: String,
 }
 
-impl From<slack::users_profile_get::Profile> for Response {
+impl From<slack::users_profile_get::Profile> for User {
     fn from(u: slack::users_profile_get::Profile) -> Self {
-        Response {
+        User {
             real_name: u.real_name,
             display_name: u.display_name,
             avatar_hash: u.avatar_hash,
@@ -26,5 +31,5 @@ pub async fn exec(token: &str) -> Result<Response> {
     let res = slack::SlackClient::new(token)
         .users_profile_get()
         .await?;
-    Ok(res.profile.into())
+    Ok(Response {user: res.profile.into()})
 }

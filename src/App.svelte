@@ -1,48 +1,56 @@
-<main>
-  <TextField
-    bind:value={query}
-    label="search query"
-    style="min-width: 250px; margin-left: 30px" />
-  <Button on:click={handleClickSearch}>
-    <Icon class="material-icons">search</Icon>
-    <Label>Search</Label>
-  </Button>
-  <div style="padding: 30px">
-    {#await messagesPromise}
-      <LinearProgress indeterminate />
-    {:then messages}
-      {#each messages as message}
-        <div style="padding: 5px;">
-          <MessageCard {message} />
+<main style="padding: 30px;">
+  {#await userPromise}
+    <InlineLoading description="Initializing..." />
+  {:then user}
+    <Tabs>
+      <Tab>
+        <div style="display: flex; align-items: center">
+          <Search20 />
+          <span style="margin-left: 3px">Free search</span>
         </div>
-      {/each}
-    {:catch error}
-      <Paper variant="outlined" style="color: red; border-color: red;">
-        <Title>Error</Title>
-        <Content>{error}</Content>
-      </Paper>
-    {/await}
-  </div>
+      </Tab>
+      <Tab>
+        <div style="display: flex; align-items: center">
+          <CriticalGlyph />
+          <span style="margin-left: 3px">By name</span>
+        </div>
+      </Tab>
+
+      <svelte:fragment slot="content">
+        <div style="height: calc(100vh - 100px);">
+          <TabContent>
+            <FreeSearch />
+          </TabContent>
+          <TabContent>
+            <div>hogehoge</div>
+          </TabContent>
+        </div>
+      </svelte:fragment>
+    </Tabs>
+  {:catch error}
+    <InlineNotification title="Error" subtitle={error} />
+  {/await}
 </main>
 
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/tauri";
+  import { onMount } from "svelte";
 
-  import Button, { Label } from "@smui/button";
-  import { Icon } from "@smui/icon-button";
-  import Paper, { Title, Content } from "@smui/paper";
-  import TextField from "@smui/textfield";
-  import LinearProgress from "@smui/linear-progress";
+  import {
+    Tabs,
+    Tab,
+    TabContent,
+    InlineLoading,
+    InlineNotification,
+  } from "carbon-components-svelte";
 
-  import { Message, Response } from "~/model/search-messages";
-  import MessageCard from "~/components/molecules/MessageCard.svelte";
+  import { Response, User } from "~/model/get-current-user";
+  import FreeSearch from "~/components/organism/FreeSearch.svelte";
+  import { Search20, CriticalGlyph } from "carbon-icons-svelte";
 
-  let messagesPromise: Promise<Message[]> = Promise.resolve([]);
-  let query = "";
+  let userPromise: Promise<User | null> = Promise.resolve(null);
 
-  const handleClickSearch = () => {
-    messagesPromise = invoke<Response>("search_messages", { query }).then(
-      (r) => r.messages
-    );
-  };
+  onMount(() => {
+    userPromise = invoke<Response>("get_current_user").then((r) => r.user);
+  });
 </script>
