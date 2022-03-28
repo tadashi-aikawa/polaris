@@ -1,23 +1,35 @@
-use anyhow::Result;
-use chrono::{DateTime, Local, TimeZone };
+use chrono::{DateTime, Local, TimeZone};
 use serde::{Deserialize, Serialize};
-
 use crate::external::slack;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Response {
-    messages: Vec<Message>,
+pub struct User {
+    pub real_name: String,
+    pub display_name: String,
+    pub avatar_hash: String,
+    pub image_url: String,
+}
+
+impl From<slack::users_profile_get::Profile> for User {
+    fn from(u: slack::users_profile_get::Profile) -> Self {
+        User {
+            real_name: u.real_name,
+            display_name: u.display_name,
+            avatar_hash: u.avatar_hash,
+            image_url: u.image_72,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Message {
-    id: String,
-    user_id: String,
-    user_name: String,
-    channel_name: String,
-    text: String,
-    permalink: String,
-    created_at: DateTime<Local>,
+pub struct Message {
+    pub id: String,
+    pub user_id: String,
+    pub user_name: String,
+    pub channel_name: String,
+    pub text: String,
+    pub permalink: String,
+    pub created_at: DateTime<Local>,
 }
 
 impl From<&slack::search_messages::Message> for Message {
@@ -37,15 +49,4 @@ impl From<&slack::search_messages::Message> for Message {
     }
 }
 
-pub async fn exec(token: &str, query: String) -> Result<Response> {
-    let res = slack::SlackClient::new(token)
-        .search_message(query.as_str(), "timestamp")
-        .await?;
-    let messages = res
-        .messages
-        .matches
-        .iter()
-        .map(|m| m.into())
-        .collect::<Vec<_>>();
-    Ok(Response { messages })
-}
+
