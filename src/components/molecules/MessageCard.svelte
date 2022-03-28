@@ -1,7 +1,10 @@
 <Card>
   <Content>
-    <b>{message.user_name}</b>
-    <span>{message.created_at}</span>
+    <div style="display: flex; gap: 10px; align-items: center">
+      <b>{message.user_name}</b>
+      <span style="font-size: 80%;">{message.created_at}</span>
+      <small>#{message.channel_name}</small>
+    </div>
     <pre style="white-space: pre-wrap">{message.text}</pre>
   </Content>
   <Actions>
