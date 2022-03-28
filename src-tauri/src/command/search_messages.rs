@@ -1,8 +1,9 @@
 use anyhow::Result;
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Local, TimeZone };
 use serde::{Deserialize, Serialize};
 
 use crate::external::slack;
+use crate::external::config;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Response {
@@ -17,7 +18,7 @@ struct Message {
     channel_name: String,
     text: String,
     permalink: String,
-    created_at: DateTime<Utc>,
+    created_at: DateTime<Local>,
 }
 
 impl From<&slack::search_messages::Message> for Message {
@@ -32,15 +33,14 @@ impl From<&slack::search_messages::Message> for Message {
             channel_name: m.channel.name.clone(),
             text: m.text.clone(),
             permalink: m.permalink.clone(),
-            created_at: DateTime::from_utc(NaiveDateTime::from_timestamp(sec, 0), Utc),
+            created_at: Local.timestamp(sec, 0),
         }
     }
 }
 
 pub async fn exec(query: String) -> Result<Response> {
-    let token =
-        std::env::var("POLARIS_SLACK_USER_TOKEN").expect("POLARIS_SLACK_USER_TOKEN is not set.");
-    let res = slack::SlackClient::new(token.as_str())
+    let config = config::load()?;
+    let res = slack::SlackClient::new(config.slack_token.as_str())
         .search_message(query.as_str(), "timestamp")
         .await?;
     let messages = res
