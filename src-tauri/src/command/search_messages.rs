@@ -3,7 +3,6 @@ use chrono::{DateTime, Local, TimeZone };
 use serde::{Deserialize, Serialize};
 
 use crate::external::slack;
-use crate::external::config;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Response {
@@ -38,9 +37,8 @@ impl From<&slack::search_messages::Message> for Message {
     }
 }
 
-pub async fn exec(query: String) -> Result<Response> {
-    let config = config::load()?;
-    let res = slack::SlackClient::new(config.slack_token.as_str())
+pub async fn exec(token: &str, query: String) -> Result<Response> {
+    let res = slack::SlackClient::new(token)
         .search_message(query.as_str(), "timestamp")
         .await?;
     let messages = res
