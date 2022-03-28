@@ -1,8 +1,8 @@
+use crate::external::slack;
 use chrono::{DateTime, Local, TimeZone};
 use serde::{Deserialize, Serialize};
-use crate::external::slack;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
     pub real_name: String,
     pub display_name: String,
@@ -48,5 +48,3 @@ impl From<&slack::search_messages::Message> for Message {
         }
     }
 }
-
-

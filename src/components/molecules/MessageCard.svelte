@@ -1,6 +1,6 @@
 <Tile>
   <div style="display: flex; gap: 10px; align-items: center">
-    <b>{message.user_name}</b>
+    <span style="font-weight: bold;">{message.user_name}</span>
     <span style="font-size: 80%;">{message.created_at}</span>
     <small>#{message.channel_name}</small>
   </div>

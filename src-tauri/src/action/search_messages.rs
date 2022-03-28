@@ -10,9 +10,12 @@ pub struct Response {
 }
 
 pub async fn exec(token: &str, query: String) -> Result<Response> {
+    println!("{:?}", query);
+
     let res = slack::SlackClient::new(token)
         .search_message(query.as_str(), "timestamp")
         .await?;
+    println!("{:?}", res);
     let messages = res
         .messages
         .matches

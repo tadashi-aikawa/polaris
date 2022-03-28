@@ -1,10 +1,9 @@
 <div style="display: flex; gap: 20px">
-  <TextInput bind:value={query} placeHolder="search query" />
   <Button size="small" icon={Search32} on:click={handleClickSearch}
     >Search</Button>
 </div>
 <div
-  style="padding: 30px; margin-top: 15px; height: calc(100vh - 100px - 70px); overflow-y: scroll">
+  style="padding: 30px; margin-top: 15px; height: calc(100vh - 100px - 50px); overflow-y: scroll">
   {#await messagesPromise}
     <InlineLoading description="Loading..." />
   {:then messages}
@@ -24,7 +23,6 @@
     Button,
     InlineLoading,
     InlineNotification,
-    TextInput,
   } from "carbon-components-svelte";
 
   import { Message, Response } from "~/model/search-messages";
@@ -32,10 +30,9 @@
   import { Search32 } from "carbon-icons-svelte";
 
   let messagesPromise: Promise<Message[]> = Promise.resolve([]);
-  let query = "";
 
   const handleClickSearch = () => {
-    messagesPromise = invoke<Response>("search_messages", { query }).then(
+    messagesPromise = invoke<Response>("get_by_name_mentioned_messages").then(
       (r) => r.messages
     );
   };

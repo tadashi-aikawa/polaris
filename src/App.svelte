@@ -1,5 +1,5 @@
 <main style="padding: 30px;">
-  {#await userPromise}
+  {#await initializePromise}
     <InlineLoading description="Initializing..." />
   {:then user}
     <Tabs>
@@ -22,7 +22,7 @@
             <FreeSearch />
           </TabContent>
           <TabContent>
-            <div>hogehoge</div>
+            <ByNameMentionedSearch />
           </TabContent>
         </div>
       </svelte:fragment>
@@ -44,13 +44,13 @@
     InlineNotification,
   } from "carbon-components-svelte";
 
-  import { Response, User } from "~/model/get-current-user";
   import FreeSearch from "~/components/organism/FreeSearch.svelte";
   import { Search20, CriticalGlyph } from "carbon-icons-svelte";
+  import ByNameMentionedSearch from "~/components/organism/ByNameMentionedSearch.svelte";
 
-  let userPromise: Promise<User | null> = Promise.resolve(null);
+  let initializePromise: Promise<void> = Promise.resolve();
 
   onMount(() => {
-    userPromise = invoke<Response>("get_current_user").then((r) => r.user);
+    initializePromise = invoke<void>("initialize");
   });
 </script>

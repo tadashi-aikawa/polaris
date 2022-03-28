@@ -6,7 +6,7 @@ use crate::external::slack;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Response {
-    user: User
+    pub user: User
 }
 
 pub async fn exec(token: &str) -> Result<Response> {
