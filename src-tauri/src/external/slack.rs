@@ -1,29 +1,39 @@
 pub mod search_messages;
+pub mod users_profile_get;
 
-use crate::external::slack::search_messages::Response;
 use anyhow::Error;
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 
 pub struct SlackClient {
+    base_url: String,
     token: String,
 }
 
 impl SlackClient {
     pub fn new(token: &str) -> SlackClient {
         SlackClient {
+            base_url: "https://slack.com/api".into(),
             token: token.into(),
         }
     }
 
-    pub async fn search_message(&self, query: &str, sort: &str) -> Result<Response, Error> {
-        let client = reqwest::Client::new();
+    pub async fn search_message(&self, query: &str, sort: &str) -> Result<search_messages::Response, Error> {
+        self.get_request("/search.messages", &[("query", query), ("sort", sort)]).await
+    }
 
-        Ok(client
-            .get("https://slack.com/api/search.messages")
-            .query(&[("query", query), ("sort", sort), ("pretty", "1")])
+    pub async fn users_profile_get(&self) -> Result<users_profile_get::Response, Error> {
+        self.get_request("/users.profile.get", &[("", "")]).await
+    }
+
+    async fn get_request<T: Serialize + ?Sized, R: DeserializeOwned>(&self, path: &str, query: &T) -> Result<R, Error> {
+        Ok(reqwest::Client::new()
+            .get(format!("{}{}", self.base_url, path))
+            .query(query)
             .bearer_auth(&self.token)
             .send()
             .await?
-            .json::<Response>()
+            .json::<R>()
             .await?)
     }
 }
