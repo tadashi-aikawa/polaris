@@ -16,7 +16,12 @@
   {:then result}
     <Tabs autoWidth>
       {#each result as r}
-        <Tab label={r.query} />
+        <Tab>
+          <div style="display: flex; align-items: center">
+            <span style="margin-right: 3px">{r.query}</span>
+            <Tag type="warm-gray" size="sm">{r.messages.length}</Tag>
+          </div>
+        </Tab>
       {/each}
       <svelte:fragment slot="content">
         {#each result as r}
