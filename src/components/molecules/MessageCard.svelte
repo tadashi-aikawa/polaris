@@ -1,4 +1,4 @@
-<Tile>
+<Tile style="display: flex; flex-direction: column; gap: 15px;">
   <div style="display: flex; gap: 10px; align-items: center">
     <span style="font-weight: bold;">{message.user_name}</span>
     <span style="font-size: 80%;">{message.created_at}</span>
@@ -6,7 +6,7 @@
   </div>
   <pre style="white-space: pre-wrap">{message.text}</pre>
 
-  <div style="display: flex; gap: 15px; padding-top: 15px">
+  <div style="display: flex; gap: 15px;">
     <TooltipIcon
       tooltipText="Open in Slack"
       size="small"

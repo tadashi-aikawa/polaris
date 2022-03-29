@@ -1,7 +1,7 @@
 <main style="padding: 30px;">
   {#await initializePromise}
     <InlineLoading description="Initializing..." />
-  {:then user}
+  {:then result}
     <Tabs>
       <Tab>
         <div style="display: flex; align-items: center">
@@ -12,7 +12,7 @@
       <Tab>
         <div style="display: flex; align-items: center">
           <CriticalGlyph />
-          <span style="margin-left: 3px">By name</span>
+          <span style="margin-left: 3px">Ego search</span>
         </div>
       </Tab>
 
@@ -22,7 +22,7 @@
             <FreeSearch />
           </TabContent>
           <TabContent>
-            <ByNameMentionedSearch />
+            <EgoSearch queries={result.queries} />
           </TabContent>
         </div>
       </svelte:fragment>
@@ -46,11 +46,21 @@
 
   import FreeSearch from "~/components/organism/FreeSearch.svelte";
   import { Search20, CriticalGlyph } from "carbon-icons-svelte";
-  import ByNameMentionedSearch from "~/components/organism/ByNameMentionedSearch.svelte";
+  import EgoSearch from "~/components/organism/EgoSearch.svelte";
 
-  let initializePromise: Promise<void> = Promise.resolve();
+  let initializePromise: Promise<{ queries: string[] }> = Promise.resolve({
+    queries: [],
+  });
 
-  onMount(() => {
-    initializePromise = invoke<void>("initialize");
+  onMount(async () => {
+    initializePromise = new Promise(async (resolve, reject) => {
+      try {
+        await invoke<void>("initialize");
+        const queries = await invoke<{ queries: string[] }>("fetch_queries");
+        resolve({ queries });
+      } catch (e) {
+        reject(e);
+      }
+    });
   });
 </script>

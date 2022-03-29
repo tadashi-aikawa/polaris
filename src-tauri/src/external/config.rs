@@ -7,6 +7,7 @@ use tauri::api::path::home_dir;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub slack_token: String,
+    pub queries: Vec<String>,
 }
 
 pub fn load() -> Result<Config> {

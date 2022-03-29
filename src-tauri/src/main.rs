@@ -28,26 +28,12 @@ fn search_messages(
     state: tauri::State<'_, PolarisState>,
     query: String,
 ) -> Result<action::search_messages::Response, String> {
+    println!("search_messages");
+
     tauri::async_runtime::block_on(
         action::search_messages::exec(
             state.0.lock().unwrap().config.slack_token.as_str(), query
         )
-    )
-        .map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn get_by_name_mentioned_messages(
-    state: tauri::State<'_, PolarisState>,
-) -> Result<action::search_messages::Response, String> {
-    let state_guard = state.0.lock().unwrap();
-
-    let current_user: Option<&User> = state_guard.current_user.as_ref();
-    let query = format!("@{}", current_user.unwrap().display_name);
-    let token = state_guard.config.slack_token.as_str();
-
-    tauri::async_runtime::block_on(
-        action::search_messages::exec( token, query )
     )
         .map_err(|e| e.to_string())
 }
@@ -70,12 +56,19 @@ fn initialize(
     Ok(())
 }
 
+#[tauri::command]
+fn fetch_queries(
+    state: tauri::State<'_, PolarisState>,
+) -> Vec<String> {
+    state.0.lock().unwrap().config.queries.to_vec()
+}
+
 fn main() {
     let config = config::load().unwrap();
 
     tauri::Builder::default()
         .manage(PolarisState(Mutex::new(InnerPolarisState { config, current_user: None })))
-        .invoke_handler(tauri::generate_handler![initialize, search_messages, get_by_name_mentioned_messages])
+        .invoke_handler(tauri::generate_handler![initialize, search_messages, fetch_queries])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
