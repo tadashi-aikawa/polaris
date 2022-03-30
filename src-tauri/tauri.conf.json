@@ -49,7 +49,11 @@
     "updater": {
       "active": false
     },
-    "allowlist": {},
+    "allowlist": {
+      "notification": {
+        "all": true
+      }
+    },
     "windows": [
       {
         "title": "Polaris",

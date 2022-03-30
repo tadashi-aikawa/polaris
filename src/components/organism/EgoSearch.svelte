@@ -70,6 +70,7 @@
   import MessageCard from "~/components/molecules/MessageCard.svelte";
   import { Search32 } from "carbon-icons-svelte";
   import { DateTime } from "owlelia";
+  import { sendNotification } from "@tauri-apps/api/notification";
 
   export let queries: string[];
 
@@ -77,6 +78,7 @@
     Promise.resolve([]);
   // XXX: やっぱ微妙だな。。
   let readById: { [messageId: string]: DateTime } = {};
+  let lastMessageIdByQuery: { [query: string]: Message["id"] } = {};
 
   $: unreadMessages = (messages: Message[]) =>
     messages.filter((x) => !readById[x.id]);
@@ -86,10 +88,17 @@
       queries.map((query) =>
         invoke<Response>("search_messages", {
           query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
-        }).then((r) => ({
-          query,
-          messages: r.messages,
-        }))
+        }).then((r) => {
+          const latestMessageId = r.messages?.[0]?.id;
+          if (lastMessageIdByQuery[query] !== latestMessageId) {
+            sendNotification(`"${query}" の結果に変更がありました`);
+            lastMessageIdByQuery[query] = latestMessageId;
+          }
+          return {
+            query,
+            messages: r.messages,
+          };
+        })
       )
     );
   };
