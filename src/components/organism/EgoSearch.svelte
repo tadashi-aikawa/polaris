@@ -12,6 +12,16 @@
 </div>
 <div style="padding-top: 10px; height: calc(100vh - 100px - 50px);">
   {#await resultPromises}
+    <Tabs autoWidth>
+      {#each queries as q}
+        <Tab>
+          <div style="display: flex; align-items: center">
+            <span style="margin-right: 3px">{q}</span>
+            <Tag size="sm" skelton />
+          </div>
+        </Tab>
+      {/each}
+    </Tabs>
     <InlineLoading description="Loading..." />
   {:then result}
     <Tabs autoWidth>
@@ -19,7 +29,8 @@
         <Tab>
           <div style="display: flex; align-items: center">
             <span style="margin-right: 3px">{r.query}</span>
-            <Tag type="warm-gray" size="sm">{r.messages.length}</Tag>
+            <Tag type="warm-gray" size="sm"
+              >{unreadMessages(r.messages).length}</Tag>
           </div>
         </Tab>
       {/each}
@@ -28,9 +39,9 @@
           <TabContent>
             <div
               style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
-              {#each r.messages as message}
+              {#each unreadMessages(r.messages) as message}
                 <div style="padding: 5px;">
-                  <MessageCard {message} />
+                  <MessageCard {message} on:click:read={handleRead} />
                 </div>
               {/each}
             </div>
@@ -58,20 +69,32 @@
   import { Message, Response } from "~/model/search-messages";
   import MessageCard from "~/components/molecules/MessageCard.svelte";
   import { Search32 } from "carbon-icons-svelte";
+  import { DateTime } from "owlelia";
 
   export let queries: string[];
 
   let resultPromises: Promise<{ query: string; messages: Message[] }[]> =
     Promise.resolve([]);
+  // XXX: やっぱ微妙だな。。
+  let readById: { [messageId: string]: DateTime } = {};
+
+  $: unreadMessages = (messages: Message[]) =>
+    messages.filter((x) => !readById[x.id]);
 
   const handleClickSearch = () => {
     resultPromises = Promise.all(
       queries.map((query) =>
-        invoke<Response>("search_messages", { query }).then((r) => ({
+        invoke<Response>("search_messages", {
+          query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
+        }).then((r) => ({
           query,
           messages: r.messages,
         }))
       )
     );
+  };
+
+  const handleRead = (event: CustomEvent<Message>) => {
+    readById[event.detail.id] = DateTime.now();
   };
 </script>

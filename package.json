@@ -27,6 +27,7 @@
     "vite": "^2.8.0"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.0.0-rc.1"
+    "@tauri-apps/api": "^1.0.0-rc.1",
+    "owlelia": "^0.40.0"
   }
 }

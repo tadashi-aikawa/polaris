@@ -38,7 +38,7 @@ impl From<&slack::search_messages::Message> for Message {
         let sec = sec.parse::<i64>().unwrap();
 
         Message {
-            id: m.iid.clone(),
+            id: format!("{}/{}",m.channel.id, m.ts ),
             user_id: m.user.clone(),
             user_name: m.username.clone(),
             channel_name: m.channel.name.clone(),
