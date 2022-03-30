@@ -4,10 +4,11 @@ use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use tauri::api::path::home_dir;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub slack_token: String,
     pub queries: Vec<String>,
+    pub interval_sec: i32,
 }
 
 pub fn load() -> Result<Config> {

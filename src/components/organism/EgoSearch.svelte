@@ -5,7 +5,7 @@
   <Button
     size="small"
     icon={Search32}
-    on:click={handleClickSearch}
+    on:click={search}
     style="margin-left: auto"
     >Search
   </Button>
@@ -71,8 +71,10 @@
   import { Search32 } from "carbon-icons-svelte";
   import { DateTime } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
+  import { onDestroy, onMount } from "svelte";
 
   export let queries: string[];
+  export let intervalSec: number;
 
   let resultPromises: Promise<{ query: string; messages: Message[] }[]> =
     Promise.resolve([]);
@@ -83,7 +85,7 @@
   $: unreadMessages = (messages: Message[]) =>
     messages.filter((x) => !readById[x.id]);
 
-  const handleClickSearch = () => {
+  const search = () => {
     resultPromises = Promise.all(
       queries.map((query) =>
         invoke<Response>("search_messages", {
@@ -106,4 +108,14 @@
   const handleRead = (event: CustomEvent<Message>) => {
     readById[event.detail.id] = DateTime.now();
   };
+
+  let handler: number;
+  onMount(() => {
+    handler = window.setInterval(search, intervalSec * 1000);
+    search();
+  });
+
+  onDestroy(() => {
+    window.clearInterval(handler);
+  });
 </script>

@@ -22,7 +22,9 @@
             <FreeSearch />
           </TabContent>
           <TabContent>
-            <EgoSearch queries={result.queries} />
+            <EgoSearch
+              queries={result.queries}
+              intervalSec={result.interval_sec} />
           </TabContent>
         </div>
       </svelte:fragment>
@@ -47,17 +49,19 @@
   import FreeSearch from "~/components/organism/FreeSearch.svelte";
   import { Search20, CriticalGlyph } from "carbon-icons-svelte";
   import EgoSearch from "~/components/organism/EgoSearch.svelte";
+  import type { Config } from "~/model/config";
 
-  let initializePromise: Promise<{ queries: string[] }> = Promise.resolve({
+  let initializePromise: Promise<Config> = Promise.resolve({
     queries: [],
+    interval_sec: 60 * 10,
   });
 
   onMount(async () => {
-    initializePromise = new Promise(async (resolve, reject) => {
+    initializePromise = new Promise<Config>(async (resolve, reject) => {
       try {
         await invoke<void>("initialize");
-        const queries = await invoke<{ queries: string[] }>("fetch_queries");
-        resolve({ queries });
+        const config = await invoke<Config>("fetch_config");
+        resolve({ queries: config.queries, interval_sec: config.interval_sec });
       } catch (e) {
         reject(e);
       }

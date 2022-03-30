@@ -51,8 +51,8 @@ fn initialize(state: tauri::State<'_, PolarisState>) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn fetch_queries(state: tauri::State<'_, PolarisState>) -> Vec<String> {
-    state.0.read().unwrap().config.queries.to_vec()
+fn fetch_config(state: tauri::State<'_, PolarisState>) -> Config {
+    state.0.read().unwrap().config.clone()
 }
 
 fn main() {
@@ -66,7 +66,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             initialize,
             search_messages,
-            fetch_queries
+            fetch_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
