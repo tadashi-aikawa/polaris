@@ -10,7 +10,7 @@ mod external;
 use crate::config::Config;
 use crate::domain::entity::User;
 use crate::external::config;
-use std::sync::RwLock;
+use parking_lot::RwLock;
 
 struct InnerPolarisState {
     config: Config,
@@ -29,7 +29,7 @@ async fn search_messages(
     query: String,
 ) -> Result<action::search_messages::Response, String> {
     println!("search_messages");
-    let token = state.0.read().unwrap().config.slack_token.clone();
+    let token = state.0.read().config.slack_token.clone();
 
     action::search_messages::exec(&token, query)
         .await
@@ -39,12 +39,12 @@ async fn search_messages(
 #[tauri::command]
 fn initialize(state: tauri::State<'_, PolarisState>) -> Result<(), String> {
     let current_user = tauri::async_runtime::block_on(action::get_current_user::exec(
-        state.0.read().unwrap().config.slack_token.as_str(),
+        state.0.read().config.slack_token.as_str(),
     ))
     .map(|x| x.user)
     .map_err(|e| e.to_string())?;
 
-    let mut state_guard = state.0.write().unwrap();
+    let mut state_guard = state.0.write();
     state_guard.set_current_user(Some(current_user));
 
     Ok(())
@@ -52,7 +52,7 @@ fn initialize(state: tauri::State<'_, PolarisState>) -> Result<(), String> {
 
 #[tauri::command]
 fn fetch_config(state: tauri::State<'_, PolarisState>) -> Config {
-    state.0.read().unwrap().config.clone()
+    state.0.read().config.clone()
 }
 
 fn main() {
