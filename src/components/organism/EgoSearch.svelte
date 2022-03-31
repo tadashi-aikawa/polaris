@@ -1,6 +1,7 @@
 <!--suppress ALL -->
 <div style="display: flex; gap: 5px">
-  <Button size="small" icon={Search32} on:click={searchAll}>Search</Button>
+  <Button size="small" icon={Search32} on:click={handleClickSearch}
+    >Search</Button>
   <Button
     kind="danger"
     size="small"
@@ -11,14 +12,14 @@
   style="padding-top: 20px; max-width: 960px; height: calc(100vh - 100px - 50px);">
   <Tabs autoWidth>
     {#each results as r}
-      <Tab disabled={unreadMessages(r.value.messages).length === 0}>
+      <Tab disabled={unreadMessages(r.item.messages).length === 0}>
         <div style="display: flex; align-items: center; height: 26px">
-          <span style="margin-right: 3px;">{r.value.query}</span>
+          <span style="margin-right: 3px;">{r.item.query}</span>
           {#if r.loading}
             <InlineLoading />
-          {:else if unreadMessages(r.value.messages).length > 0}
+          {:else if unreadMessages(r.item.messages).length > 0}
             <Tag type="cyan" size="sm"
-              >{unreadMessages(r.value.messages).length}</Tag>
+              >{unreadMessages(r.item.messages).length}</Tag>
           {/if}
         </div>
       </Tab>
@@ -29,10 +30,10 @@
         {#if r.error}
           <InlineNotification title="Error" subtitle={r.error} />
         {/if}
-        <TabContent skelton={r.loading}>
+        <TabContent>
           <div
             style="max-width: 960px; height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
-            {#each unreadMessages(r.value.messages) as message, i (message)}
+            {#each unreadMessages(r.item.messages) as message, i (message)}
               <div
                 style="padding: 5px;"
                 animate:flip={{ duration: 500 }}
@@ -62,8 +63,9 @@
 
   import { Message, Response } from "~/model/search-messages";
   import MessageCard from "~/components/molecules/MessageCard.svelte";
+  import { sleep } from "~/utils/time";
   import { Search32, CheckmarkOutline32 } from "carbon-icons-svelte";
-  import { DateTime, fromPromise, LiquidValue } from "owlelia";
+  import { AsyncResult, DateTime, fromPromise, Nullable } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
   import { onDestroy, onMount } from "svelte";
   import { fade, fly } from "svelte/transition";
@@ -72,51 +74,26 @@
   export let queries: string[];
   export let intervalSec: number;
 
-  type LValue = { query: string; messages: Message[] };
+  type Item = { query: string; messages: Message[] };
+  type LiquidValue = {
+    item: Item;
+    loading: boolean;
+    error: Nullable<string>;
+  };
 
-  // XXX: やっぱ微妙だな。。
   let readById: { [messageId: string]: DateTime } = {};
   let lastMessageIdByQuery: { [query: string]: Message["id"] } = {};
-  let results: LiquidValue<LValue, string>[] = queries.map(
-    (query) => new LiquidValue({ query, messages: [] })
-  );
+  let results: LiquidValue[] = queries.map((query) => ({
+    item: { query, messages: [] },
+    loading: false,
+    error: null,
+  }));
 
   $: unreadMessages = (messages: Message[]) =>
     messages.filter((x) => !readById[x.id]);
 
-  const search = async (
-    lv: LiquidValue<LValue, string>
-  ): Promise<LiquidValue<LValue, string>> => {
-    await lv.load(() => {
-      const query = lv.value.query;
-      return fromPromise(
-        invoke<Response>("search_messages", {
-          query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
-          withoutMe: true,
-        }).then((r) => {
-          const latestMessageId = r.messages?.[0]?.id;
-          if (lastMessageIdByQuery[query] !== latestMessageId) {
-            sendNotification(`"${query}" の結果に変更がありました`);
-            lastMessageIdByQuery[query] = latestMessageId;
-          }
-          return {
-            query,
-            messages: r.messages,
-          };
-        })
-      );
-    });
-    return lv;
-  };
-
   const handleRead = (event: CustomEvent<Message>) => {
     readById[event.detail.id] = DateTime.now();
-  };
-
-  const searchAll = async () => {
-    for (let i = 0; i < results.length; i++) {
-      results[i] = await search(results[i]);
-    }
   };
 
   const markAsReadAll = async () => {
@@ -125,13 +102,59 @@
     });
   };
 
-  let handler: number;
-  onMount(() => {
-    handler = window.setInterval(searchAll, intervalSec * 1000);
-    searchAll();
+  const searchItem = async (query: string): Promise<Item> => {
+    return invoke<Response>("search_messages", {
+      query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
+      withoutMe: false,
+    }).then((r) => {
+      const latestMessageId = r.messages?.[0]?.id;
+      if (lastMessageIdByQuery[query] !== latestMessageId) {
+        sendNotification(`"${query}" の結果に変更がありました`);
+        lastMessageIdByQuery[query] = latestMessageId;
+      }
+      return {
+        query,
+        messages: r.messages,
+      };
+    });
+  };
+
+  const search = async (i: number) => {
+    results[i].loading = true;
+    try {
+      results[i].item = await searchItem(results[i].item.query);
+    } catch (e) {
+      results[i].error = e;
+    }
+    results[i].loading = false;
+  };
+
+  const searchAll = async () => {
+    for (let i = 0; i < results.length; i++) {
+      await search(i);
+    }
+  };
+
+  const handleClickSearch = searchAll;
+
+  let intervalHandlers: number[] = [];
+
+  onMount(async () => {
+    await searchAll();
+
+    const eachIntervalSec = intervalSec / results.length;
+    for (let i = 0; i < results.length; i++) {
+      await sleep(eachIntervalSec * 1000);
+      await search(i);
+
+      const handler = window.setInterval(async () => {
+        await search(i);
+      }, intervalSec * 1000);
+      intervalHandlers.push(handler);
+    }
   });
 
   onDestroy(() => {
-    window.clearInterval(handler);
+    intervalHandlers.forEach(window.clearInterval);
   });
 </script>
