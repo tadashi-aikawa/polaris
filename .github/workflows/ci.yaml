@@ -1,8 +1,5 @@
-name: "CI"
-on:
-  push:
-    branches:
-      - master
+name: "test-on-pr"
+on: [pull_request]
 
 jobs:
   test-tauri:
