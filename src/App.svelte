@@ -1,4 +1,4 @@
-<main style="padding: 30px;">
+<main style="padding: 45px;">
   {#await initializePromise}
     <InlineLoading description="Initializing..." />
   {:then result}
@@ -12,16 +12,8 @@
   import { invoke } from "@tauri-apps/api/tauri";
   import { onMount } from "svelte";
 
-  import {
-    Tabs,
-    Tab,
-    TabContent,
-    InlineLoading,
-    InlineNotification,
-  } from "carbon-components-svelte";
+  import { InlineLoading, InlineNotification } from "carbon-components-svelte";
 
-  import FreeSearch from "~/components/organism/FreeSearch.svelte";
-  import { Search20, CriticalGlyph } from "carbon-icons-svelte";
   import EgoSearch from "~/components/organism/EgoSearch.svelte";
   import type { Config } from "~/model/config";
 

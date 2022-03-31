@@ -1,4 +1,4 @@
-<Tile style="max-width: 800px; padding: 0">
+<Tile style="width: 920px; padding: 0">
   <div class="vertical-space">
     <div class="main">
       <div style="display: flex; flex-direction: column; gap: 15px;">

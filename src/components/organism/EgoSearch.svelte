@@ -1,29 +1,23 @@
 <!--suppress ALL -->
-<div style="display: flex; gap: 3px">
-  {#each queries as query}
-    <Tag type="cyan">{query}</Tag>
-  {/each}
+<div style="display: flex; gap: 5px">
+  <Button size="small" icon={Search32} on:click={searchAll}>Search</Button>
   <Button
+    kind="danger"
     size="small"
-    icon={Search32}
-    on:click={searchAll}
-    style="margin-left: auto"
-    >Search
-  </Button>
+    icon={CheckmarkOutline32}
+    on:click={markAsReadAll}>Mark as read all</Button>
 </div>
-<div style="padding-top: 10px; height: calc(100vh - 100px - 50px);">
+<div
+  style="padding-top: 20px; width: 960px; height: calc(100vh - 100px - 50px);">
   <Tabs autoWidth>
     {#each results as r}
       <Tab disabled={r.value.messages.length === 0}>
         <div style="display: flex; align-items: center">
           <span style="margin-right: 3px">{r.value.query}</span>
           {#if r.loading}
-            <Tag size="sm" skelton />
+            <InlineLoading />
           {:else}
-            <Tag
-              type="warm-gray"
-              size="sm"
-              disabled={r.value.messages.length === 0}
+            <Tag type="cyan" size="sm" disabled={r.value.messages.length === 0}
               >{unreadMessages(r.value.messages).length}</Tag>
           {/if}
         </div>
@@ -37,7 +31,7 @@
         {/if}
         <TabContent skelton={r.loading}>
           <div
-            style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
+            style="width: 960px; height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
             {#each unreadMessages(r.value.messages) as message, i (message)}
               <div
                 style="padding: 5px;"
@@ -63,11 +57,12 @@
     TabContent,
     Tabs,
     Tag,
+    InlineLoading,
   } from "carbon-components-svelte";
 
   import { Message, Response } from "~/model/search-messages";
   import MessageCard from "~/components/molecules/MessageCard.svelte";
-  import { Search32 } from "carbon-icons-svelte";
+  import { Search32, CheckmarkOutline32 } from "carbon-icons-svelte";
   import { DateTime, fromPromise, LiquidValue } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
   import { onDestroy, onMount } from "svelte";
@@ -121,6 +116,12 @@
     for (let i = 0; i < results.length; i++) {
       results[i] = await search(results[i]);
     }
+  };
+
+  const markAsReadAll = async () => {
+    unreadMessages(results.flatMap((x) => x.value.messages)).forEach((m) => {
+      readById[m.id] = DateTime.now();
+    });
   };
 
   let handler: number;
