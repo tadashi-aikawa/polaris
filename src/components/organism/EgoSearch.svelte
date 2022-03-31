@@ -1,3 +1,4 @@
+<!--suppress ALL -->
 <div style="display: flex; gap: 3px">
   {#each queries as query}
     <Tag type="cyan">{query}</Tag>
@@ -5,60 +6,55 @@
   <Button
     size="small"
     icon={Search32}
-    on:click={search}
+    on:click={handleSearch}
     style="margin-left: auto"
     >Search
   </Button>
 </div>
 <div style="padding-top: 10px; height: calc(100vh - 100px - 50px);">
-  {#await resultPromises}
-    <Tabs autoWidth>
-      {#each queries as q}
-        <Tab>
-          <div style="display: flex; align-items: center">
-            <span style="margin-right: 3px">{q}</span>
+  <Tabs autoWidth>
+    {#each results as r}
+      <Tab>
+        <div style="display: flex; align-items: center">
+          <span style="margin-right: 3px">{r.value.query}</span>
+          {#if r.loading}
             <Tag size="sm" skelton />
-          </div>
-        </Tab>
-      {/each}
-    </Tabs>
-    <InlineLoading description="Loading..." />
-  {:then result}
-    <Tabs autoWidth>
-      {#each result as r}
-        <Tab>
-          <div style="display: flex; align-items: center">
-            <span style="margin-right: 3px">{r.query}</span>
+          {:else}
             <Tag type="warm-gray" size="sm"
-              >{unreadMessages(r.messages).length}</Tag>
+              >{unreadMessages(r.value.messages).length}</Tag>
+          {/if}
+        </div>
+      </Tab>
+    {/each}
+
+    <svelte:fragment slot="content">
+      {#each results as r}
+        {#if r.error}
+          <InlineNotification title="Error" subtitle={r.error.message} />
+        {/if}
+        <TabContent skelton={r.loading}>
+          <div
+            style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
+            {#each unreadMessages(r.value.messages) as message, i (message)}
+              <div
+                style="padding: 5px;"
+                animate:flip={{ duration: 500 }}
+                in:fade
+                out:fly={{ x: 100 }}>
+                <MessageCard {message} on:click:read={handleRead} />
+              </div>
+            {/each}
           </div>
-        </Tab>
+        </TabContent>
       {/each}
-      <svelte:fragment slot="content">
-        {#each result as r}
-          <TabContent>
-            <div
-              style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
-              {#each unreadMessages(r.messages) as message}
-                <div style="padding: 5px;">
-                  <MessageCard {message} on:click:read={handleRead} />
-                </div>
-              {/each}
-            </div>
-          </TabContent>
-        {/each}
-      </svelte:fragment>
-    </Tabs>
-  {:catch error}
-    <InlineNotification title="Error" subtitle={error} />
-  {/await}
+    </svelte:fragment>
+  </Tabs>
 </div>
 
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/tauri";
   import {
     Button,
-    InlineLoading,
     InlineNotification,
     Tab,
     TabContent,
@@ -69,25 +65,33 @@
   import { Message, Response } from "~/model/search-messages";
   import MessageCard from "~/components/molecules/MessageCard.svelte";
   import { Search32 } from "carbon-icons-svelte";
-  import { DateTime } from "owlelia";
+  import { DateTime, fromPromise, LiquidValue } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
   import { onDestroy, onMount } from "svelte";
+  import { fade, fly } from "svelte/transition";
+  import { flip } from "svelte/animate";
 
   export let queries: string[];
   export let intervalSec: number;
 
-  let resultPromises: Promise<{ query: string; messages: Message[] }[]> =
-    Promise.resolve([]);
+  type LValue = { query: string; messages: Message[] };
+
   // XXX: やっぱ微妙だな。。
   let readById: { [messageId: string]: DateTime } = {};
   let lastMessageIdByQuery: { [query: string]: Message["id"] } = {};
+  let results: LiquidValue<LValue>[] = queries.map(
+    (query) => new LiquidValue({ query, messages: [] })
+  );
 
   $: unreadMessages = (messages: Message[]) =>
     messages.filter((x) => !readById[x.id]);
 
-  const search = () => {
-    resultPromises = Promise.all(
-      queries.map((query) =>
+  const search = async (
+    lv: LiquidValue<LValue>
+  ): Promise<LiquidValue<LValue>> => {
+    await lv.load(() => {
+      const query = lv.value.query;
+      return fromPromise(
         invoke<Response>("search_messages", {
           query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
         }).then((r) => {
@@ -101,18 +105,25 @@
             messages: r.messages,
           };
         })
-      )
-    );
+      );
+    });
+    return lv;
   };
 
   const handleRead = (event: CustomEvent<Message>) => {
     readById[event.detail.id] = DateTime.now();
   };
 
+  const handleSearch = async () => {
+    for (let i = 0; i < results.length; i++) {
+      results[i] = await search(results[i]);
+    }
+  };
+
   let handler: number;
   onMount(() => {
-    handler = window.setInterval(search, intervalSec * 1000);
-    search();
+    handler = window.setInterval(handleSearch, intervalSec * 1000);
+    handleSearch();
   });
 
   onDestroy(() => {
