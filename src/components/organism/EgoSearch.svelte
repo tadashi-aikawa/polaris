@@ -105,7 +105,7 @@
   const searchItem = async (query: string): Promise<Item> => {
     return invoke<Response>("search_messages", {
       query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
-      withoutMe: false,
+      withoutMe: true,
     }).then((r) => {
       const latestMessageId = r.messages?.[0]?.id;
       if (lastMessageIdByQuery[query] !== latestMessageId) {
