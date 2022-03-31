@@ -27,11 +27,19 @@ struct PolarisState(pub RwLock<InnerPolarisState>);
 async fn search_messages(
     state: tauri::State<'_, PolarisState>,
     query: String,
+    without_me: bool,
 ) -> Result<action::search_messages::Response, String> {
     println!("search_messages");
-    let token = state.0.read().config.slack_token.clone();
 
-    action::search_messages::exec(&token, query)
+    let token = state.0.read().config.slack_token.clone();
+    let my_name = state.0.read().current_user.clone().map(|x| x.display_name);
+
+    let q = match (my_name, without_me) {
+        (Some(name), true) => format!("{} -from:@{}", query, name),
+        _ => query,
+    };
+
+    action::search_messages::exec(&token, q)
         .await
         .map_err(|e| e.to_string())
 }

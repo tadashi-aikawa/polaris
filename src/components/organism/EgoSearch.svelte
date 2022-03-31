@@ -27,7 +27,7 @@
     <svelte:fragment slot="content">
       {#each results as r}
         {#if r.error}
-          <InlineNotification title="Error" subtitle={r.error.message} />
+          <InlineNotification title="Error" subtitle={r.error} />
         {/if}
         <TabContent skelton={r.loading}>
           <div
@@ -77,7 +77,7 @@
   // XXX: やっぱ微妙だな。。
   let readById: { [messageId: string]: DateTime } = {};
   let lastMessageIdByQuery: { [query: string]: Message["id"] } = {};
-  let results: LiquidValue<LValue>[] = queries.map(
+  let results: LiquidValue<LValue, string>[] = queries.map(
     (query) => new LiquidValue({ query, messages: [] })
   );
 
@@ -85,13 +85,14 @@
     messages.filter((x) => !readById[x.id]);
 
   const search = async (
-    lv: LiquidValue<LValue>
-  ): Promise<LiquidValue<LValue>> => {
+    lv: LiquidValue<LValue, string>
+  ): Promise<LiquidValue<LValue, string>> => {
     await lv.load(() => {
       const query = lv.value.query;
       return fromPromise(
         invoke<Response>("search_messages", {
           query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
+          withoutMe: true,
         }).then((r) => {
           const latestMessageId = r.messages?.[0]?.id;
           if (lastMessageIdByQuery[query] !== latestMessageId) {
