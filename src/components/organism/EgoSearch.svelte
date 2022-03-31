@@ -97,7 +97,7 @@
   };
 
   const markAsReadAll = async () => {
-    unreadMessages(results.flatMap((x) => x.value.messages)).forEach((m) => {
+    unreadMessages(results.flatMap((x) => x.item.messages)).forEach((m) => {
       readById[m.id] = DateTime.now();
     });
   };
@@ -140,8 +140,6 @@
   let intervalHandlers: number[] = [];
 
   onMount(async () => {
-    await searchAll();
-
     const eachIntervalSec = intervalSec / results.length;
     for (let i = 0; i < results.length; i++) {
       await sleep(eachIntervalSec * 1000);
