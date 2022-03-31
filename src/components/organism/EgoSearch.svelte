@@ -11,13 +11,13 @@
   style="padding-top: 20px; max-width: 960px; height: calc(100vh - 100px - 50px);">
   <Tabs autoWidth>
     {#each results as r}
-      <Tab disabled={r.value.messages.length === 0}>
-        <div style="display: flex; align-items: center">
-          <span style="margin-right: 3px">{r.value.query}</span>
+      <Tab disabled={unreadMessages(r.value.messages).length === 0}>
+        <div style="display: flex; align-items: center; height: 26px">
+          <span style="margin-right: 3px;">{r.value.query}</span>
           {#if r.loading}
             <InlineLoading />
-          {:else}
-            <Tag type="cyan" size="sm" disabled={r.value.messages.length === 0}
+          {:else if unreadMessages(r.value.messages).length > 0}
+            <Tag type="cyan" size="sm"
               >{unreadMessages(r.value.messages).length}</Tag>
           {/if}
         </div>
