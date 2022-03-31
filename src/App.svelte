@@ -2,33 +2,7 @@
   {#await initializePromise}
     <InlineLoading description="Initializing..." />
   {:then result}
-    <Tabs>
-      <Tab>
-        <div style="display: flex; align-items: center">
-          <Search20 />
-          <span style="margin-left: 3px">Free search</span>
-        </div>
-      </Tab>
-      <Tab>
-        <div style="display: flex; align-items: center">
-          <CriticalGlyph />
-          <span style="margin-left: 3px">Ego search</span>
-        </div>
-      </Tab>
-
-      <svelte:fragment slot="content">
-        <div style="height: calc(100vh - 100px);">
-          <TabContent>
-            <FreeSearch />
-          </TabContent>
-          <TabContent>
-            <EgoSearch
-              queries={result.queries}
-              intervalSec={result.interval_sec} />
-          </TabContent>
-        </div>
-      </svelte:fragment>
-    </Tabs>
+    <EgoSearch queries={result.queries} intervalSec={result.interval_sec} />
   {:catch error}
     <InlineNotification title="Error" subtitle={error} />
   {/await}

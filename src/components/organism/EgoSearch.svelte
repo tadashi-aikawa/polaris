@@ -6,7 +6,7 @@
   <Button
     size="small"
     icon={Search32}
-    on:click={handleSearch}
+    on:click={searchAll}
     style="margin-left: auto"
     >Search
   </Button>
@@ -14,13 +14,16 @@
 <div style="padding-top: 10px; height: calc(100vh - 100px - 50px);">
   <Tabs autoWidth>
     {#each results as r}
-      <Tab>
+      <Tab disabled={r.value.messages.length === 0}>
         <div style="display: flex; align-items: center">
           <span style="margin-right: 3px">{r.value.query}</span>
           {#if r.loading}
             <Tag size="sm" skelton />
           {:else}
-            <Tag type="warm-gray" size="sm"
+            <Tag
+              type="warm-gray"
+              size="sm"
+              disabled={r.value.messages.length === 0}
               >{unreadMessages(r.value.messages).length}</Tag>
           {/if}
         </div>
@@ -114,7 +117,7 @@
     readById[event.detail.id] = DateTime.now();
   };
 
-  const handleSearch = async () => {
+  const searchAll = async () => {
     for (let i = 0; i < results.length; i++) {
       results[i] = await search(results[i]);
     }
@@ -122,8 +125,8 @@
 
   let handler: number;
   onMount(() => {
-    handler = window.setInterval(handleSearch, intervalSec * 1000);
-    handleSearch();
+    handler = window.setInterval(searchAll, intervalSec * 1000);
+    searchAll();
   });
 
   onDestroy(() => {
