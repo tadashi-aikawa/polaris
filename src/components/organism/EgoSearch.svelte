@@ -9,7 +9,7 @@
     on:click={markAsReadAll}>Mark as read all</Button>
 </div>
 <div
-  style="padding-top: 20px; max-width: 960px; height: calc(100vh - 100px - 50px);">
+  style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
   <Tabs autoWidth>
     {#each results as r}
       <Tab disabled={unreadMessages(r.item.messages).length === 0}>
@@ -32,7 +32,7 @@
         {/if}
         <TabContent>
           <div
-            style="max-width: 960px; height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
+            style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
             {#each unreadMessages(r.item.messages) as message, i (message)}
               <div
                 style="padding: 5px;"
