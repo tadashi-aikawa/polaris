@@ -10,6 +10,7 @@ mod external;
 use crate::config::Config;
 use crate::domain::entity::User;
 use crate::external::config;
+use chrono::Local;
 use parking_lot::RwLock;
 
 struct InnerVigilanciaState {
@@ -29,7 +30,12 @@ async fn search_messages(
     query: String,
     exclude_me: bool,
 ) -> Result<action::search_messages::Response, String> {
-    println!("search_messages");
+    println!(
+        "[{}] search_messages: query={}, exclude_me={}",
+        Local::now(),
+        query,
+        exclude_me
+    );
 
     let token = state.read().config.slack_token.clone();
     let my_name = state.read().current_user.clone().map(|x| x.display_name);
