@@ -12,20 +12,20 @@ use crate::domain::entity::User;
 use crate::external::config;
 use parking_lot::RwLock;
 
-struct InnerPolarisState {
+struct InnerVigilanciaState {
     config: Config,
     current_user: Option<User>,
 }
-impl InnerPolarisState {
+impl InnerVigilanciaState {
     fn set_current_user(&mut self, user: Option<User>) {
         self.current_user = user;
     }
 }
-struct PolarisState(pub RwLock<InnerPolarisState>);
+struct VigilanciaState(pub RwLock<InnerVigilanciaState>);
 
 #[tauri::command]
 async fn search_messages(
-    state: tauri::State<'_, PolarisState>,
+    state: tauri::State<'_, VigilanciaState>,
     query: String,
     without_me: bool,
 ) -> Result<action::search_messages::Response, String> {
@@ -45,7 +45,7 @@ async fn search_messages(
 }
 
 #[tauri::command]
-fn initialize(state: tauri::State<'_, PolarisState>) -> Result<(), String> {
+fn initialize(state: tauri::State<'_, VigilanciaState>) -> Result<(), String> {
     let current_user = tauri::async_runtime::block_on(action::get_current_user::exec(
         state.0.read().config.slack_token.as_str(),
     ))
@@ -59,7 +59,7 @@ fn initialize(state: tauri::State<'_, PolarisState>) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn fetch_config(state: tauri::State<'_, PolarisState>) -> Config {
+fn fetch_config(state: tauri::State<'_, VigilanciaState>) -> Config {
     state.0.read().config.clone()
 }
 
@@ -67,7 +67,7 @@ fn main() {
     let config = config::load().unwrap();
 
     tauri::Builder::default()
-        .manage(PolarisState(RwLock::new(InnerPolarisState {
+        .manage(VigilanciaState(RwLock::new(InnerVigilanciaState {
             config,
             current_user: None,
         })))

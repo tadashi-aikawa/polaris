@@ -13,7 +13,7 @@ pub struct Config {
 
 pub fn load() -> Result<Config> {
     let dir = home_dir().ok_or_else(|| anyhow!("Can't find home_dir!"))?;
-    let f = File::open(dir.join(".polaris.json"))?;
+    let f = File::open(dir.join(".vigilancia.json"))?;
     let r: Config = serde_json::from_reader(f).unwrap();
     Ok(r)
 }

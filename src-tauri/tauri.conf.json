@@ -1,6 +1,6 @@
 {
   "package": {
-    "productName": "polaris",
+    "productName": "vigilancia",
     "version": "0.2.0"
   },
   "build": {
@@ -56,7 +56,7 @@
     },
     "windows": [
       {
-        "title": "Polaris",
+        "title": "Vigilancia",
         "width": 800,
         "height": 600,
         "resizable": true,
