@@ -21,7 +21,7 @@ impl InnerVigilanciaState {
         self.current_user = user;
     }
 }
-struct VigilanciaState(pub RwLock<InnerVigilanciaState>);
+type VigilanciaState = RwLock<InnerVigilanciaState>;
 
 #[tauri::command]
 async fn search_messages(
@@ -31,8 +31,8 @@ async fn search_messages(
 ) -> Result<action::search_messages::Response, String> {
     println!("search_messages");
 
-    let token = state.0.read().config.slack_token.clone();
-    let my_name = state.0.read().current_user.clone().map(|x| x.display_name);
+    let token = state.read().config.slack_token.clone();
+    let my_name = state.read().current_user.clone().map(|x| x.display_name);
 
     let q = match (my_name, without_me) {
         (Some(name), true) => format!("{} -from:@{}", query, name),
@@ -47,12 +47,12 @@ async fn search_messages(
 #[tauri::command]
 fn initialize(state: tauri::State<'_, VigilanciaState>) -> Result<(), String> {
     let current_user = tauri::async_runtime::block_on(action::get_current_user::exec(
-        state.0.read().config.slack_token.as_str(),
+        state.read().config.slack_token.as_str(),
     ))
     .map(|x| x.user)
     .map_err(|e| e.to_string())?;
 
-    let mut state_guard = state.0.write();
+    let mut state_guard = state.write();
     state_guard.set_current_user(Some(current_user));
 
     Ok(())
@@ -60,17 +60,17 @@ fn initialize(state: tauri::State<'_, VigilanciaState>) -> Result<(), String> {
 
 #[tauri::command]
 fn fetch_config(state: tauri::State<'_, VigilanciaState>) -> Config {
-    state.0.read().config.clone()
+    state.read().config.clone()
 }
 
 fn main() {
     let config = config::load().unwrap();
 
     tauri::Builder::default()
-        .manage(VigilanciaState(RwLock::new(InnerVigilanciaState {
+        .manage(RwLock::new(InnerVigilanciaState {
             config,
             current_user: None,
-        })))
+        }))
         .invoke_handler(tauri::generate_handler![
             initialize,
             search_messages,
