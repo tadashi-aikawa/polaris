@@ -27,14 +27,14 @@ type VigilanciaState = RwLock<InnerVigilanciaState>;
 async fn search_messages(
     state: tauri::State<'_, VigilanciaState>,
     query: String,
-    without_me: bool,
+    exclude_me: bool,
 ) -> Result<action::search_messages::Response, String> {
     println!("search_messages");
 
     let token = state.read().config.slack_token.clone();
     let my_name = state.read().current_user.clone().map(|x| x.display_name);
 
-    let q = match (my_name, without_me) {
+    let q = match (my_name, exclude_me) {
         (Some(name), true) => format!("{} -from:@{}", query, name),
         _ => query,
     };

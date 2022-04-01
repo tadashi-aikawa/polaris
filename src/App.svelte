@@ -2,7 +2,7 @@
   {#await initializePromise}
     <InlineLoading description="Initializing..." />
   {:then result}
-    <EgoSearch queries={result.queries} intervalSec={result.interval_sec} />
+    <EgoSearch queries={result.queries} intervalSec={result.interval_sec} includeMe={result.include_me} />
   {:catch error}
     <InlineNotification title="Error" subtitle={error} />
   {/await}
@@ -20,14 +20,14 @@
   let initializePromise: Promise<Config> = Promise.resolve({
     queries: [],
     interval_sec: 60 * 10,
+    include_me: false,
   });
 
   onMount(async () => {
     initializePromise = new Promise<Config>(async (resolve, reject) => {
       try {
         await invoke<void>("initialize");
-        const config = await invoke<Config>("fetch_config");
-        resolve({ queries: config.queries, interval_sec: config.interval_sec });
+        resolve(await invoke<Config>("fetch_config"));
       } catch (e) {
         reject(e);
       }

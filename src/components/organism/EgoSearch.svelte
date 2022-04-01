@@ -73,6 +73,7 @@
 
   export let queries: string[];
   export let intervalSec: number;
+  export let includeMe: boolean;
 
   type Item = { query: string; messages: Message[] };
   type LiquidValue = {
@@ -105,7 +106,7 @@
   const searchItem = async (query: string): Promise<Item> => {
     return invoke<Response>("search_messages", {
       query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
-      withoutMe: true,
+      excludeMe: !includeMe,
     }).then((r) => {
       const latestMessageId = r.messages?.[0]?.id;
       if (lastMessageIdByQuery[query] !== latestMessageId) {

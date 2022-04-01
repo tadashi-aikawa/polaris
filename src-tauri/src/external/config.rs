@@ -9,6 +9,7 @@ pub struct Config {
     pub slack_token: String,
     pub queries: Vec<String>,
     pub interval_sec: i32,
+    pub include_me: bool,
 }
 
 pub fn load() -> Result<Config> {
