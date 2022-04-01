@@ -107,23 +107,24 @@
     return invoke<Response>("search_messages", {
       query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
       excludeMe: !includeMe,
-    }).then((r) => {
-      const latestMessageId = r.messages?.[0]?.id;
-      if (lastMessageIdByQuery[query] !== latestMessageId) {
-        sendNotification(`"${query}" の結果に変更がありました`);
-        lastMessageIdByQuery[query] = latestMessageId;
-      }
-      return {
+    }).then((r) => ({
         query,
         messages: r.messages,
-      };
-    });
+      }));
   };
 
-  const search = async (i: number) => {
+  const search = async (i: number, shouldNotify: boolean) => {
     results[i].loading = true;
     try {
-      results[i].item = await searchItem(results[i].item.query);
+      const query = results[i].item.query
+      const item = await searchItem(query);
+      results[i].item = item
+
+      const latestMessageId = item.messages?.[0]?.id;
+      if (shouldNotify && lastMessageIdByQuery[query] !== latestMessageId && !readById[latestMessageId]) {
+        sendNotification(`"${query}" に関する新しいメッセージを見つけました😎`);
+      }
+      lastMessageIdByQuery[query] = latestMessageId;
     } catch (e) {
       results[i].error = e;
     }
@@ -132,7 +133,7 @@
 
   const searchAll = async () => {
     for (let i = 0; i < results.length; i++) {
-      await search(i);
+      await search(i, false);
     }
   };
 
@@ -144,10 +145,10 @@
     const eachIntervalSec = intervalSec / results.length;
     for (let i = 0; i < results.length; i++) {
       await sleep(eachIntervalSec * 1000);
-      await search(i);
+      await search(i, true);
 
       const handler = window.setInterval(async () => {
-        await search(i);
+        await search(i, true);
       }, intervalSec * 1000);
       intervalHandlers.push(handler);
     }
