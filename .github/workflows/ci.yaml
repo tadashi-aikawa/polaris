@@ -2,7 +2,7 @@ name: "test-on-pr"
 on: [pull_request]
 
 jobs:
-  test-tauri:
+  test:
     strategy:
       fail-fast: false
       matrix:
