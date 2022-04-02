@@ -47,10 +47,64 @@ pub struct Message {
     pub text: String,
     /// ex: https://hoge.slack.com/archives/U1ABCDE3/p123456789012345678
     pub permalink: String,
+    /// ブロック
+    pub blocks: Option<Vec<Block>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Channel {
     pub id: String,
     pub name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Block {
+    #[serde(rename = "type")]
+    pub block_type: String,
+    pub block_id: String,
+    pub elements: Vec<Element>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(tag = "type")]
+pub enum Element {
+    #[serde(rename = "rich_text_section")]
+    RichTextSection { elements: Vec<Element> },
+    #[serde(rename = "rich_text_quote")]
+    RichTextQuote { elements: Vec<Element> },
+    #[serde(rename = "rich_text_list")]
+    RichTextList {
+        style: ListStyle,
+        indent: i64,
+        elements: Vec<Element>,
+    },
+    #[serde(rename = "rich_text_preformatted")]
+    RichTextPreformatted { border: i64, elements: Vec<Element> },
+    #[serde(rename = "emoji")]
+    Emoji { name: String },
+    #[serde(rename = "text")]
+    Text { text: String, style: Option<Style> },
+    #[serde(rename = "link")]
+    Link { url: String, text: Option<String> },
+    #[serde(rename = "user")]
+    User { user_id: String },
+    #[serde(rename = "broadcast")]
+    Broadcast { range: String },
+    #[serde(rename = "channel")]
+    Channel {
+        channel_id: String,
+        style: Option<Style>,
+    },
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Style {
+    code: Option<bool>,
+    bold: Option<bool>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum ListStyle {
+    #[serde(rename = "bullet")]
+    Bullet,
 }

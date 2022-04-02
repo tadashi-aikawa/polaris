@@ -7,7 +7,17 @@
           <span style="font-size: 80%;">{message.created_at}</span>
           <small>#{message.channel_name}</small>
         </div>
-        <pre style="white-space: pre-wrap">{message.text}</pre>
+        <div style="white-space: pre-wrap; line-height: normal">
+          {#if message.blocks}
+            {#each message.blocks as block}
+              {#each block.elements as element}
+                <MessageElement {element} />
+              {/each}
+            {/each}
+          {:else}
+            <span>{message.text}</span>
+          {/if}
+        </div>
       </div>
 
       <div style="display: flex; gap: 15px;">
@@ -18,7 +28,7 @@
           icon={Launch20}
           style="cursor: pointer"
           on:click={() => {
-            window.open(message.permalink);
+            shell.open(message.permalink);
           }} />
       </div>
     </div>
@@ -30,11 +40,13 @@
 </Tile>
 
 <script lang="ts">
+  import { shell } from "@tauri-apps/api";
   import { Tile, TooltipIcon } from "carbon-components-svelte";
   import { Launch20, CheckmarkOutline32 } from "carbon-icons-svelte";
 
   import type { Message } from "~/model/search-messages";
   import { createEventDispatcher } from "svelte";
+  import MessageElement from "~/components/molecules/MessageElement.svelte";
 
   export let message: Message;
 

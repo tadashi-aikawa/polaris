@@ -1,4 +1,5 @@
 use crate::external::slack;
+use crate::external::slack::search_messages::Block;
 use chrono::{DateTime, Local, TimeZone};
 use serde::{Deserialize, Serialize};
 
@@ -30,6 +31,7 @@ pub struct Message {
     pub text: String,
     pub permalink: String,
     pub created_at: DateTime<Local>,
+    pub blocks: Option<Vec<Block>>,
 }
 
 impl From<&slack::search_messages::Message> for Message {
@@ -38,13 +40,14 @@ impl From<&slack::search_messages::Message> for Message {
         let sec = sec.parse::<i64>().unwrap();
 
         Message {
-            id: format!("{}/{}",m.channel.id, m.ts ),
+            id: format!("{}/{}", m.channel.id, m.ts),
             user_id: m.user.clone(),
             user_name: m.username.clone(),
             channel_name: m.channel.name.clone(),
             text: m.text.clone(),
             permalink: m.permalink.clone(),
             created_at: Local.timestamp(sec, 0),
+            blocks: m.blocks.clone(),
         }
     }
 }

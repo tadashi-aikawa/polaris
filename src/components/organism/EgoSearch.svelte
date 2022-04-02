@@ -122,10 +122,12 @@
     return invoke<Response>("search_messages", {
       query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
       excludeMe: !includeMe,
-    }).then((r) => ({
-      query,
-      messages: r.messages,
-    }));
+    }).then((r) => {
+      return {
+        query,
+        messages: r.messages,
+      };
+    });
   };
 
   const search = async (i: number, shouldNotify: boolean) => {
