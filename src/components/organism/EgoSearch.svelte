@@ -122,7 +122,7 @@
 
       const latestMessageId = item.messages?.[0]?.id;
       if (shouldNotify && lastMessageIdByQuery[query] !== latestMessageId && !readById[latestMessageId]) {
-        sendNotification(`"${query}" に関する新しいメッセージを見つけました😎`);
+        sendNotification(`"${query}" に関する新しいメッセージを見つけました🦋`);
       }
       lastMessageIdByQuery[query] = latestMessageId;
     } catch (e) {
