@@ -6,10 +6,9 @@
     kind="danger"
     size="small"
     icon={CheckmarkOutline32}
-    on:click={markAsReadAll}>Mark as read all</Button>
+    on:click={handleClickMarkAsReadAll}>Mark as read all</Button>
 </div>
-<div
-  style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
+<div style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
   <Tabs autoWidth>
     {#each results as r}
       <Tab disabled={unreadMessages(r.item.messages).length === 0}>
@@ -31,6 +30,14 @@
           <InlineNotification title="Error" subtitle={r.error} />
         {/if}
         <TabContent>
+          {#if unreadMessages(r.item.messages).length > 0}
+            <Button
+              kind="danger-ghost"
+              size="small"
+              icon={CheckmarkOutline32}
+              on:click={() => handleClickMarkAsReadItem(r.item)}
+              >Mark as read messages in this tab</Button>
+          {/if}
           <div
             style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
             {#each unreadMessages(r.item.messages) as message, i (message)}
@@ -39,7 +46,7 @@
                 animate:flip={{ duration: 500 }}
                 in:fade
                 out:fly={{ x: 100 }}>
-                <MessageCard {message} on:click:read={handleRead} />
+                <MessageCard {message} on:click:read={handleClickMarkAsRead} />
               </div>
             {/each}
           </div>
@@ -93,14 +100,22 @@
   $: unreadMessages = (messages: Message[]) =>
     messages.filter((x) => !readById[x.id]);
 
-  const handleRead = (event: CustomEvent<Message>) => {
-    readById[event.detail.id] = DateTime.now();
+  const markAsRead = async (message: Message) => {
+    readById[message.id] = DateTime.now();
+  };
+  const markAsReadItem = async (item: Item) => {
+    unreadMessages(item.messages).forEach(markAsRead);
   };
 
-  const markAsReadAll = async () => {
-    unreadMessages(results.flatMap((x) => x.item.messages)).forEach((m) => {
-      readById[m.id] = DateTime.now();
-    });
+  const handleClickMarkAsRead = (event: CustomEvent<Message>) => {
+    markAsRead(event.detail);
+  };
+
+  const handleClickMarkAsReadItem = (item: Item) => {
+    markAsReadItem(item);
+  };
+  const handleClickMarkAsReadAll = async () => {
+    results.map((x) => x.item).forEach(markAsReadItem);
   };
 
   const searchItem = async (query: string): Promise<Item> => {
@@ -108,20 +123,24 @@
       query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
       excludeMe: !includeMe,
     }).then((r) => ({
-        query,
-        messages: r.messages,
-      }));
+      query,
+      messages: r.messages,
+    }));
   };
 
   const search = async (i: number, shouldNotify: boolean) => {
     results[i].loading = true;
     try {
-      const query = results[i].item.query
+      const query = results[i].item.query;
       const item = await searchItem(query);
-      results[i].item = item
+      results[i].item = item;
 
       const latestMessageId = item.messages?.[0]?.id;
-      if (shouldNotify && lastMessageIdByQuery[query] !== latestMessageId && !readById[latestMessageId]) {
+      if (
+        shouldNotify &&
+        lastMessageIdByQuery[query] !== latestMessageId &&
+        !readById[latestMessageId]
+      ) {
         sendNotification(`"${query}" に関する新しいメッセージを見つけました🦋`);
       }
       lastMessageIdByQuery[query] = latestMessageId;
@@ -143,13 +162,13 @@
     const eachIntervalSec = intervalSec / results.length;
     const endlessIntervalSearch = async (i: number) => {
       await search(i, true);
-      await sleep(intervalSec * 1000)
+      await sleep(intervalSec * 1000);
       endlessIntervalSearch(i);
-    }
+    };
 
     for (let i = 0; i < results.length; i++) {
       await sleep(eachIntervalSec * 1000);
-      endlessIntervalSearch(i)
+      endlessIntervalSearch(i);
     }
   });
 </script>
