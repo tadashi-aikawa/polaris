@@ -6,7 +6,7 @@
     kind="danger"
     size="small"
     icon={CheckmarkOutline32}
-    on:click={handleClickMarkAsReadAll}>Mark as read all</Button>
+    on:click={handleClickMarkAsReadAll}>Mark all as read</Button>
 </div>
 <div style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
   <Tabs autoWidth>
@@ -36,7 +36,7 @@
               size="small"
               icon={CheckmarkOutline32}
               on:click={() => handleClickMarkAsReadItem(r.item)}
-              >Mark as read messages in this tab</Button>
+              >Mark messages in this tab as read</Button>
           {/if}
           <div
             style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
