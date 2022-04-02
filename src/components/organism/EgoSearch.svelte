@@ -67,7 +67,7 @@
   import { Search32, CheckmarkOutline32 } from "carbon-icons-svelte";
   import { AsyncResult, DateTime, fromPromise, Nullable } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { fade, fly } from "svelte/transition";
   import { flip } from "svelte/animate";
 
@@ -139,22 +139,17 @@
 
   const handleClickSearch = searchAll;
 
-  let intervalHandlers: number[] = [];
-
   onMount(async () => {
     const eachIntervalSec = intervalSec / results.length;
+    const endlessIntervalSearch = async (i: number) => {
+      await search(i, true);
+      await sleep(intervalSec * 1000)
+      endlessIntervalSearch(i);
+    }
+
     for (let i = 0; i < results.length; i++) {
       await sleep(eachIntervalSec * 1000);
-      await search(i, true);
-
-      const handler = window.setInterval(async () => {
-        await search(i, true);
-      }, intervalSec * 1000);
-      intervalHandlers.push(handler);
+      endlessIntervalSearch(i)
     }
-  });
-
-  onDestroy(() => {
-    intervalHandlers.forEach(window.clearInterval);
   });
 </script>
