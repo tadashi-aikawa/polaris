@@ -11,7 +11,7 @@
 <div style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
   <Tabs autoWidth>
     {#each results as r}
-      <Tab disabled={unreadMessages(r.item.messages).length === 0}>
+      <Tab>
         <div style="display: flex; align-items: center; height: 26px">
           <span style="margin-right: 3px;">{r.item.query}</span>
           {#if r.loading}
@@ -40,6 +40,25 @@
           {/if}
           <div
             style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
+            {#if unreadMessages(r.item.messages).length === 0}
+              <div
+                transition:fade
+                style="display: flex; justify-content: center; align-items: center; flex-direction: column; padding-top: 60px">
+                <img
+                  src="https://github.com/tadashi-aikawa/vigilancia/raw/master/src-tauri/icons/128x128@2x.png" />
+                {#if r.item.lastSearchDate}
+                  <span style="font-size: 18px; color: mediumpurple">
+                    There are no new beneficial messages since
+                    {r.item.lastSearchDate.displayDateTime}
+                  </span>
+                {:else}
+                  <span style="font-size: 18px; color: mediumpurple">
+                    You should wait until starting the initial search or click
+                    the search button immediately
+                  </span>
+                {/if}
+              </div>
+            {/if}
             {#each unreadMessages(r.item.messages) as message, i (message)}
               <div
                 style="padding: 5px;"
@@ -82,7 +101,7 @@
   export let intervalSec: number;
   export let includeMe: boolean;
 
-  type Item = { query: string; messages: Message[] };
+  type Item = { query: string; messages: Message[]; lastSearchDate?: DateTime };
   type LiquidValue = {
     item: Item;
     loading: boolean;
@@ -126,6 +145,7 @@
       return {
         query,
         messages: r.messages,
+        lastSearchDate: DateTime.now(),
       };
     });
   };
