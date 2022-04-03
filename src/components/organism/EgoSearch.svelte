@@ -25,11 +25,17 @@
     {/each}
 
     <svelte:fragment slot="content">
-      {#each results as r}
+      {#each results as r, i}
         {#if r.error}
           <InlineNotification title="Error" subtitle={r.error} />
         {/if}
         <TabContent>
+          <Button
+            kind="ghost"
+            size="small"
+            icon={Search32}
+            on:click={() => handleClickSearchByCurrentQuery(i)}
+            >Search by a current query</Button>
           {#if unreadMessages(r.item.messages).length > 0}
             <Button
               kind="danger-ghost"
@@ -170,6 +176,10 @@
       results[i].error = e;
     }
     results[i].loading = false;
+  };
+
+  const handleClickSearchByCurrentQuery = async (i: number) => {
+    await search(i, false);
   };
 
   const searchAll = async () => {
