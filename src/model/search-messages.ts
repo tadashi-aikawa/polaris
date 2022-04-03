@@ -21,6 +21,11 @@ export interface Block {
   elements: Element[];
 }
 
+export type EmojiElement = {
+  type: "emoji";
+  name: string;
+};
+
 export type Element =
   | {
       type: "rich_text_section";
@@ -41,10 +46,7 @@ export type Element =
       border: number;
       elements: Element[];
     }
-  | {
-      type: "emoji";
-      name: string;
-    }
+  | EmojiElement
   | {
       type: "text";
       text: string;

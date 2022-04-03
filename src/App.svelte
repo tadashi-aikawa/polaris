@@ -2,7 +2,10 @@
   {#await initializePromise}
     <InlineLoading description="Initializing..." />
   {:then result}
-    <EgoSearch queries={result.queries} intervalSec={result.interval_sec} includeMe={result.include_me} />
+    <EgoSearch
+      queries={result.queries}
+      intervalSec={result.interval_sec}
+      includeMe={result.include_me} />
   {:catch error}
     <InlineNotification title="Error" subtitle={error} />
   {/await}
@@ -15,7 +18,9 @@
   import { InlineLoading, InlineNotification } from "carbon-components-svelte";
 
   import EgoSearch from "~/components/organism/EgoSearch.svelte";
-  import type { Config } from "~/model/config";
+  import type { Response as Config } from "~/model/fetch-config";
+  import type { Response as EmojiResponse } from "~/model/fetch-emoji-list";
+  import { emojiMap } from "~/stores";
 
   let initializePromise: Promise<Config> = Promise.resolve({
     queries: [],
@@ -27,6 +32,7 @@
     initializePromise = new Promise<Config>(async (resolve, reject) => {
       try {
         await invoke<void>("initialize");
+        emojiMap.set((await invoke<EmojiResponse>("fetch_emoji_list")).emoji);
         resolve(await invoke<Config>("fetch_config"));
       } catch (e) {
         reject(e);

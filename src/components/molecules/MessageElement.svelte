@@ -23,8 +23,7 @@
     {/each}
   </div>
 {:else if element.type === "emoji"}
-  💩
-  <!--    TODO: 絵文字を表示-->
+  <Emoji {element} />
 {:else if element.type === "text"}
   <span
     class="text"
@@ -63,6 +62,8 @@
   import type { Element } from "~/model/search-messages";
   import MessageElement from "~/components/molecules/MessageElement.svelte";
   import { Link } from "carbon-components-svelte";
+  import Emoji from "~/components/atoms/Emoji.svelte";
+
   export let element: Element;
 </script>
 

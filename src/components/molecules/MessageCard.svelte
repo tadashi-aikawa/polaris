@@ -7,7 +7,7 @@
           <span style="font-size: 80%;">{message.created_at}</span>
           <small>#{message.channel_name}</small>
         </div>
-        <div style="white-space: pre-wrap; line-height: normal">
+        <div style="white-space: pre-wrap; line-height: normal;">
           {#if message.blocks}
             {#each message.blocks as block}
               {#each block.elements as element}

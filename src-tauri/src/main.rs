@@ -1,27 +1,30 @@
 #![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
+all(not(debug_assertions), target_os = "windows"),
+windows_subsystem = "windows"
 )]
+
+use chrono::Local;
+use parking_lot::RwLock;
+
+use crate::config::Config;
+use crate::domain::entity::User;
+use crate::external::config;
 
 mod action;
 mod domain;
 mod external;
 
-use crate::config::Config;
-use crate::domain::entity::User;
-use crate::external::config;
-use chrono::Local;
-use parking_lot::RwLock;
-
 struct InnerVigilanciaState {
     config: Config,
     current_user: Option<User>,
 }
+
 impl InnerVigilanciaState {
     fn set_current_user(&mut self, user: Option<User>) {
         self.current_user = user;
     }
 }
+
 type VigilanciaState = RwLock<InnerVigilanciaState>;
 
 #[tauri::command]
@@ -55,13 +58,25 @@ fn initialize(state: tauri::State<'_, VigilanciaState>) -> Result<(), String> {
     let current_user = tauri::async_runtime::block_on(action::get_current_user::exec(
         state.read().config.slack_token.as_str(),
     ))
-    .map(|x| x.user)
-    .map_err(|e| e.to_string())?;
+        .map(|x| x.user)
+        .map_err(|e| e.to_string())?;
 
     let mut state_guard = state.write();
     state_guard.set_current_user(Some(current_user));
 
     Ok(())
+}
+
+#[tauri::command]
+async fn fetch_emoji_list(
+    state: tauri::State<'_, VigilanciaState>,
+) -> Result<action::get_emoji_list::Response, String> {
+    println!("[{}] fetch_emoji_list", Local::now(), );
+
+    let token = state.read().config.slack_token.clone();
+    action::get_emoji_list::exec(&token)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -80,7 +95,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             initialize,
             search_messages,
-            fetch_config
+            fetch_config,
+            fetch_emoji_list,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

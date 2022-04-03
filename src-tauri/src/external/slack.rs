@@ -1,9 +1,10 @@
-pub mod search_messages;
-pub mod users_profile_get;
-
 use anyhow::Error;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+
+pub mod emoji_list;
+pub mod search_messages;
+pub mod users_profile_get;
 
 pub struct SlackClient {
     base_url: String,
@@ -18,15 +19,28 @@ impl SlackClient {
         }
     }
 
-    pub async fn search_message(&self, query: &str, sort: &str) -> Result<search_messages::Response, Error> {
-        self.get_request("/search.messages", &[("query", query), ("sort", sort)]).await
+    pub async fn search_message(
+        &self,
+        query: &str,
+        sort: &str,
+    ) -> Result<search_messages::Response, Error> {
+        self.get_request("/search.messages", &[("query", query), ("sort", sort)])
+            .await
     }
 
     pub async fn users_profile_get(&self) -> Result<users_profile_get::Response, Error> {
         self.get_request("/users.profile.get", &[("", "")]).await
     }
 
-    async fn get_request<T: Serialize + ?Sized, R: DeserializeOwned>(&self, path: &str, query: &T) -> Result<R, Error> {
+    pub async fn emoji_list(&self) -> Result<emoji_list::Response, Error> {
+        self.get_request("/emoji.list", &[("", "")]).await
+    }
+
+    async fn get_request<T: Serialize + ?Sized, R: DeserializeOwned>(
+        &self,
+        path: &str,
+        query: &T,
+    ) -> Result<R, Error> {
         Ok(reqwest::Client::new()
             .get(format!("{}{}", self.base_url, path))
             .query(query)
