@@ -9,6 +9,11 @@
     size="small"
     icon={ProgressBarRound32}
     on:click={handleClickReloadConfig}>Reload config</Button>
+  {#each results as r}
+    {#if r.loading}
+      <InlineLoading description={`Search ${r.item.condition.query}...`} />
+    {/if}
+  {/each}
 </div>
 <div style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
   {#if unreadResults.length === 0}
