@@ -201,16 +201,16 @@
   };
 
   const handleClickReloadConfig = async () => {
-    timeoutHandlers.forEach((x) => window.clearTimeout(x));
     await invoke<void>("reload_config");
     await loadConfig();
+    await subscribeSearchers();
   };
 
   const handleClickSearch = searchAll;
 
   let timeoutHandlers: number[] = [];
-  onMount(async () => {
-    await loadConfig();
+  const subscribeSearchers = async () => {
+    timeoutHandlers.forEach((x) => window.clearTimeout(x));
 
     const eachIntervalSec = config.interval_sec / results.length;
     const endlessIntervalSearch = async (i: number) => {
@@ -222,10 +222,18 @@
       );
     };
 
-    for (let i = 0; i < results.length; i++) {
-      await sleep(eachIntervalSec * 1000);
-      endlessIntervalSearch(i);
-    }
+    results.forEach((_, i) =>
+      timeoutHandlers.push(
+        window.setTimeout(() => {
+          endlessIntervalSearch(i);
+        }, eachIntervalSec * 1000 * (i + 1))
+      )
+    );
+  };
+
+  onMount(async () => {
+    await loadConfig();
+    await subscribeSearchers();
   });
 
   onDestroy(() => {
