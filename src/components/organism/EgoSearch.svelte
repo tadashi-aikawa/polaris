@@ -134,7 +134,7 @@
   $: unreadMessages = (messages: Message[]) =>
     messages.filter((x) => !readById[x.id]);
   $: unreadResults = results.filter(
-    (x) => unreadMessages(x.item.messages).length > 0
+    (x) => unreadMessages(x.item.messages).length > 0 || x.error
   );
 
   const markAsRead = async (message: Message) => {
