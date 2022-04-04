@@ -14,7 +14,8 @@
   <Tabs autoWidth>
     {#each results as r}
       <Tab>
-        <div style="display: flex; align-items: center; height: 26px">
+        <div
+          style="display: flex; align-items: center; height: 26px; padding-bottom: 10px;">
           <span style="margin-right: 3px;">{r.item.query}</span>
           {#if r.loading}
             <InlineLoading />
@@ -32,20 +33,22 @@
           <InlineNotification title="Error" subtitle={r.error} />
         {/if}
         <TabContent>
-          <Button
-            kind="ghost"
-            size="small"
-            icon={Search32}
-            on:click={() => handleClickSearchByCurrentQuery(i)}
-            >Search by a current query</Button>
-          {#if unreadMessages(r.item.messages).length > 0}
+          <div style="margin-bottom: 10px">
             <Button
-              kind="danger-ghost"
+              kind="ghost"
               size="small"
-              icon={CheckmarkOutline32}
-              on:click={() => handleClickMarkAsReadItem(r.item)}
-              >Mark messages in this tab as read</Button>
-          {/if}
+              icon={Search32}
+              on:click={() => handleClickSearchByCurrentQuery(i)}
+              >Search by a current query</Button>
+            {#if unreadMessages(r.item.messages).length > 0}
+              <Button
+                kind="danger-ghost"
+                size="small"
+                icon={CheckmarkOutline32}
+                on:click={() => handleClickMarkAsReadItem(r.item)}
+                >Mark messages in this tab as read</Button>
+            {/if}
+          </div>
           <div
             style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
             {#if unreadMessages(r.item.messages).length === 0}
