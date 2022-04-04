@@ -31,6 +31,11 @@ export type UserElement = {
   user_id: string;
 };
 
+export type UserGroupElement = {
+  type: "usergroup";
+  usergroup_id: string;
+};
+
 export type Element =
   | {
       type: "rich_text_section";
@@ -63,6 +68,7 @@ export type Element =
       text: Nullable<string>;
     }
   | UserElement
+  | UserGroupElement
   | {
       type: "broadcast";
       range: "channel" | "here";

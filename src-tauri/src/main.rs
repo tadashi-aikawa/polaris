@@ -95,6 +95,18 @@ async fn fetch_all_users(
 }
 
 #[tauri::command]
+async fn fetch_all_usergroups(
+    state: tauri::State<'_, VigilanciaState>,
+) -> Result<action::get_all_usergroup_list::Response, String> {
+    println!("[{}] fetch_all_usergroups", Local::now(),);
+
+    let token = state.read().config.slack_token.clone();
+    action::get_all_usergroup_list::exec(&token)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 fn get_config(state: tauri::State<'_, VigilanciaState>) -> Config {
     println!("[{}] get_config", Local::now(),);
     state.read().config.clone()
@@ -124,6 +136,7 @@ fn main() {
             reload_config,
             fetch_emoji_list,
             fetch_all_users,
+            fetch_all_usergroups,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
