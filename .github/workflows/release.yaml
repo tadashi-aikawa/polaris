@@ -33,7 +33,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag: "__VERSION__"
+        tagName: "__VERSION__"
         releaseName: "Vigilancia v__VERSION__"
         releaseDraft: true
     - name: "Discord notification (not success)"
