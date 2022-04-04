@@ -25,7 +25,7 @@ Vigilancia is a desktop application for Slack core user who desires to find bene
 ## Configuration
 
 `~/.vigilancia.json`
-```json
+```js
 {
   "slack_token": "xoxp-....................", // 【必須】OAuthトークン
   "interval_sec": 600, // 【必須】条件ごとに巡回する間隔のデフォルト値 (秒)
@@ -35,14 +35,12 @@ Vigilancia is a desktop application for Slack core user who desires to find bene
       "title": "ガチメンション", // 【任意】タブタイトル (省略時はqueryの値を使う)
       "color": "red", // 【任意】バッジの色. 選択肢は後で (省略時はcyan)
       "should_notify": true, // 【任意】新たなメッセージがあったときデスクトップに通知するか (省略時はfalse)
-      "include_me": true // 【任意】自分のメッセージを検索対象に含めるか (省略時はfalse),
+      "include_me": true, // 【任意】自分のメッセージを検索対象に含めるか (省略時はfalse),
       "interval_sec": 60 // 【任意】検索の定期間隔(秒) (省略時は親のinterval_secを使う)
     },
     {
       ...
     }
-    .
-    .
   ]
 }
 ```
