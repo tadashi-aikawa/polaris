@@ -19,7 +19,9 @@ pub struct User {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Images {
+    image_32: String,
     image_48: String,
+    image_512: String,
 }
 
 impl From<slack::users_list::Member> for User {
@@ -29,7 +31,9 @@ impl From<slack::users_list::Member> for User {
             name: r.name,
             real_name: r.real_name,
             images: Images {
+                image_32: r.profile.image_32,
                 image_48: r.profile.image_48,
+                image_512: r.profile.image_512,
             },
         }
     }

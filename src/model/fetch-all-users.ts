@@ -14,5 +14,7 @@ export interface User {
 }
 
 export interface Images {
+  image_32: string;
   image_48: string;
+  image_512: string;
 }

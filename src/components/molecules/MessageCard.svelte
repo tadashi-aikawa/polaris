@@ -2,11 +2,10 @@
   <div class="vertical-space">
     <div class="main">
       <div style="display: flex; flex-direction: column; gap: 15px;">
-        <div style="display: flex; gap: 10px; align-items: center">
-          <span style="font-weight: bold;">{message.user_name}</span>
-          <span style="font-size: 80%;">{message.created_at}</span>
-          <small>#{message.channel_name}</small>
-        </div>
+        <MessageHeader
+          userId={message.user_id}
+          createdAt={message.created_at}
+          channelName={message.channel_name} />
         <div style="white-space: pre-wrap; line-height: normal;">
           {#if message.blocks}
             {#each message.blocks as block}
@@ -47,6 +46,7 @@
   import type { Message } from "~/model/search-messages";
   import { createEventDispatcher } from "svelte";
   import MessageElement from "~/components/molecules/MessageElement.svelte";
+  import MessageHeader from "~/components/molecules/MessageHeader.svelte";
 
   export let message: Message;
 
