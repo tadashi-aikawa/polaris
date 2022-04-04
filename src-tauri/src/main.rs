@@ -1,6 +1,6 @@
 #![cfg_attr(
-all(not(debug_assertions), target_os = "windows"),
-windows_subsystem = "windows"
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
 )]
 
 use chrono::Local;
@@ -20,6 +20,9 @@ struct InnerVigilanciaState {
 }
 
 impl InnerVigilanciaState {
+    fn set_config(&mut self, config: Config) {
+        self.config = config;
+    }
     fn set_current_user(&mut self, user: Option<User>) {
         self.current_user = user;
     }
@@ -58,8 +61,8 @@ fn initialize(state: tauri::State<'_, VigilanciaState>) -> Result<(), String> {
     let current_user = tauri::async_runtime::block_on(action::get_current_user::exec(
         state.read().config.slack_token.as_str(),
     ))
-        .map(|x| x.user)
-        .map_err(|e| e.to_string())?;
+    .map(|x| x.user)
+    .map_err(|e| e.to_string())?;
 
     let mut state_guard = state.write();
     state_guard.set_current_user(Some(current_user));
@@ -71,7 +74,7 @@ fn initialize(state: tauri::State<'_, VigilanciaState>) -> Result<(), String> {
 async fn fetch_emoji_list(
     state: tauri::State<'_, VigilanciaState>,
 ) -> Result<action::get_emoji_list::Response, String> {
-    println!("[{}] fetch_emoji_list", Local::now(), );
+    println!("[{}] fetch_emoji_list", Local::now(),);
 
     let token = state.read().config.slack_token.clone();
     action::get_emoji_list::exec(&token)
@@ -83,7 +86,7 @@ async fn fetch_emoji_list(
 async fn fetch_all_users(
     state: tauri::State<'_, VigilanciaState>,
 ) -> Result<action::get_all_users_list::Response, String> {
-    println!("[{}] fetch_all_users", Local::now(), );
+    println!("[{}] fetch_all_users", Local::now(),);
 
     let token = state.read().config.slack_token.clone();
     action::get_all_users_list::exec(&token)
@@ -92,8 +95,18 @@ async fn fetch_all_users(
 }
 
 #[tauri::command]
-fn fetch_config(state: tauri::State<'_, VigilanciaState>) -> Config {
+fn get_config(state: tauri::State<'_, VigilanciaState>) -> Config {
+    println!("[{}] get_config", Local::now(),);
     state.read().config.clone()
+}
+
+#[tauri::command]
+fn reload_config(state: tauri::State<'_, VigilanciaState>) -> () {
+    println!("[{}] reload_config", Local::now(),);
+    let config = config::load().unwrap();
+
+    let mut state_guard = state.write();
+    state_guard.set_config(config);
 }
 
 fn main() {
@@ -107,7 +120,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             initialize,
             search_messages,
-            fetch_config,
+            get_config,
+            reload_config,
             fetch_emoji_list,
             fetch_all_users,
         ])

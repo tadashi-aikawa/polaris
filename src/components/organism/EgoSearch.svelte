@@ -7,6 +7,8 @@
     size="small"
     icon={CheckmarkOutline32}
     on:click={handleClickMarkAsReadAll}>Mark all as read</Button>
+  <Button size="small" icon={Search32} on:click={handleClickReloadConfig}
+    >Reload config</Button>
 </div>
 <div style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
   <Tabs autoWidth>
@@ -99,13 +101,9 @@
   import { Search32, CheckmarkOutline32 } from "carbon-icons-svelte";
   import { AsyncResult, DateTime, fromPromise, Nullable } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { fade, fly } from "svelte/transition";
   import { flip } from "svelte/animate";
-
-  export let queries: string[];
-  export let intervalSec: number;
-  export let includeMe: boolean;
 
   type Item = { query: string; messages: Message[]; lastSearchDate?: DateTime };
   type LiquidValue = {
@@ -114,13 +112,15 @@
     error: Nullable<string>;
   };
 
+  let config: Config = {
+    queries: [],
+    interval_sec: 60 * 10,
+    include_me: false,
+  };
+
   let readById: { [messageId: string]: DateTime } = {};
   let lastMessageIdByQuery: { [query: string]: Message["id"] } = {};
-  let results: LiquidValue[] = queries.map((query) => ({
-    item: { query, messages: [] },
-    loading: false,
-    error: null,
-  }));
+  let results: LiquidValue[] = [];
 
   $: unreadMessages = (messages: Message[]) =>
     messages.filter((x) => !readById[x.id]);
@@ -146,7 +146,7 @@
   const searchItem = async (query: string): Promise<Item> => {
     return invoke<Response>("search_messages", {
       query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
-      excludeMe: !includeMe,
+      excludeMe: !config.include_me,
     }).then((r) => {
       return {
         query,
@@ -188,19 +188,44 @@
     }
   };
 
+  const loadConfig = async () => {
+    config = await invoke<Config>("get_config");
+    results = config.queries.map((query) => ({
+      item: { query, messages: [] },
+      loading: false,
+      error: null,
+    }));
+  };
+
+  const handleClickReloadConfig = async () => {
+    timeoutHandlers.forEach((x) => window.clearTimeout(x));
+    await invoke<void>("reload_config");
+    await loadConfig();
+  };
+
   const handleClickSearch = searchAll;
 
+  let timeoutHandlers: number[] = [];
   onMount(async () => {
-    const eachIntervalSec = intervalSec / results.length;
+    await loadConfig();
+
+    const eachIntervalSec = config.interval_sec / results.length;
     const endlessIntervalSearch = async (i: number) => {
       await search(i, true);
-      await sleep(intervalSec * 1000);
-      endlessIntervalSearch(i);
+      timeoutHandlers.push(
+        window.setTimeout(() => {
+          endlessIntervalSearch(i);
+        }, config.interval_sec * 1000)
+      );
     };
 
     for (let i = 0; i < results.length; i++) {
       await sleep(eachIntervalSec * 1000);
       endlessIntervalSearch(i);
     }
+  });
+
+  onDestroy(() => {
+    timeoutHandlers.forEach((x) => window.clearTimeout(x));
   });
 </script>
