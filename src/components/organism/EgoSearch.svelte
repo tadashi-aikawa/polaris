@@ -1,14 +1,14 @@
 <!--suppress ALL -->
 <div style="display: flex; gap: 5px">
-  <Button size="small" icon={Search32} on:click={handleClickSearch}
-    >Search</Button>
   <Button
     kind="danger"
     size="small"
     icon={CheckmarkOutline32}
     on:click={handleClickMarkAsReadAll}>Mark all as read</Button>
-  <Button size="small" icon={Search32} on:click={handleClickReloadConfig}
-    >Reload config</Button>
+  <Button
+    size="small"
+    icon={ProgressBarRound32}
+    on:click={handleClickReloadConfig}>Reload config</Button>
 </div>
 <div style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
   {#if unreadResults.length === 0}
@@ -92,7 +92,11 @@
   import { Message, Response } from "~/model/search-messages";
   import MessageCard from "~/components/molecules/MessageCard.svelte";
   import { sleep } from "~/utils/time";
-  import { Search32, CheckmarkOutline32 } from "carbon-icons-svelte";
+  import {
+    ProgressBarRound32,
+    Search32,
+    CheckmarkOutline32,
+  } from "carbon-icons-svelte";
   import { AsyncResult, DateTime, fromPromise, Nullable } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
   import { onDestroy, onMount } from "svelte";
@@ -153,7 +157,7 @@
     });
   };
 
-  const search = async (i: number, shouldNotify: boolean) => {
+  const search = async (i: number, suppressNotify: boolean) => {
     results[i].loading = true;
     try {
       const query = results[i].item.query;
@@ -162,7 +166,7 @@
 
       const latestMessageId = item.messages?.[0]?.id;
       if (
-        shouldNotify &&
+        !suppressNotify &&
         lastMessageIdByQuery[query] !== latestMessageId &&
         !readById[latestMessageId]
       ) {
@@ -207,11 +211,14 @@
     timeoutHandlers.forEach((x) => window.clearTimeout(x));
 
     const eachIntervalSec = config.interval_sec / results.length;
-    const endlessIntervalSearch = async (i: number) => {
-      await search(i, true);
+    const endlessIntervalSearch = async (
+      i: number,
+      suppressNotify: boolean
+    ) => {
+      await search(i, suppressNotify);
       timeoutHandlers.push(
         window.setTimeout(() => {
-          endlessIntervalSearch(i);
+          endlessIntervalSearch(i, false);
         }, config.interval_sec * 1000)
       );
     };
@@ -219,8 +226,8 @@
     results.forEach((_, i) =>
       timeoutHandlers.push(
         window.setTimeout(() => {
-          endlessIntervalSearch(i);
-        }, eachIntervalSec * 1000 * (i + 1))
+          endlessIntervalSearch(i, true);
+        }, 5 * 1000 * (i + 1))
       )
     );
   };
