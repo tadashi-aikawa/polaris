@@ -28,11 +28,13 @@
       <Tab>
         <div
           style="display: flex; align-items: center; height: 26px; padding-bottom: 10px;">
-          <span style="margin-right: 3px;">{r.item.query}</span>
+          <span style="margin-right: 3px;">
+            {r.item.condition.title ?? r.item.condition.query}
+          </span>
           {#if r.loading}
             <InlineLoading />
           {:else}
-            <Tag type="cyan" size="sm"
+            <Tag type={r.item.condition.color ?? "cyan"} size="sm"
               >{unreadMessages(r.item.messages).length}</Tag>
           {/if}
         </div>
@@ -90,6 +92,7 @@
   } from "carbon-components-svelte";
 
   import { Message, Response } from "~/model/search-messages";
+  import { Response as Config, Condition } from "~/model/fetch-config";
   import MessageCard from "~/components/molecules/MessageCard.svelte";
   import { sleep } from "~/utils/time";
   import {
@@ -103,7 +106,11 @@
   import { fade, fly } from "svelte/transition";
   import { flip } from "svelte/animate";
 
-  type Item = { query: string; messages: Message[]; lastSearchDate?: DateTime };
+  type Item = {
+    condition: Condition;
+    messages: Message[];
+    lastSearchDate?: DateTime;
+  };
   type LiquidValue = {
     item: Item;
     loading: boolean;
@@ -111,9 +118,8 @@
   };
 
   let config: Config = {
-    queries: [],
     interval_sec: 60 * 10,
-    include_me: false,
+    conditions: [],
   };
 
   let readById: { [messageId: string]: DateTime } = {};
@@ -144,13 +150,15 @@
     results.map((x) => x.item).forEach(markAsReadItem);
   };
 
-  const searchItem = async (query: string): Promise<Item> => {
+  const searchItem = async (condition: Condition): Promise<Item> => {
     return invoke<Response>("search_messages", {
-      query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
-      excludeMe: !config.include_me,
+      query: `${condition.query} after:${
+        DateTime.today().minusDays(2).displayDate
+      }`,
+      excludeMe: !condition.include_me,
     }).then((r) => {
       return {
-        query,
+        condition,
         messages: r.messages,
         lastSearchDate: DateTime.now(),
       };
@@ -160,19 +168,22 @@
   const search = async (i: number, suppressNotify: boolean) => {
     results[i].loading = true;
     try {
-      const query = results[i].item.query;
-      const item = await searchItem(query);
+      const condition = results[i].item.condition;
+      const item = await searchItem(condition);
       results[i].item = item;
 
       const latestMessageId = item.messages?.[0]?.id;
       if (
+        condition.should_notify &&
         !suppressNotify &&
-        lastMessageIdByQuery[query] !== latestMessageId &&
+        lastMessageIdByQuery[condition.query] !== latestMessageId &&
         !readById[latestMessageId]
       ) {
-        sendNotification(`"${query}" に関する新しいメッセージを見つけました🦋`);
+        sendNotification(
+          `"${condition.query}" に関する新しいメッセージを見つけました🦋`
+        );
       }
-      lastMessageIdByQuery[query] = latestMessageId;
+      lastMessageIdByQuery[condition.query] = latestMessageId;
     } catch (e) {
       results[i].error = e;
     }
@@ -191,8 +202,8 @@
 
   const loadConfig = async () => {
     config = await invoke<Config>("get_config");
-    results = config.queries.map((query) => ({
-      item: { query, messages: [] },
+    results = config.conditions.map((condition) => ({
+      item: { condition, messages: [] },
       loading: false,
       error: null,
     }));
@@ -210,7 +221,6 @@
   const subscribeSearchers = async () => {
     timeoutHandlers.forEach((x) => window.clearTimeout(x));
 
-    const eachIntervalSec = config.interval_sec / results.length;
     const endlessIntervalSearch = async (
       i: number,
       suppressNotify: boolean
@@ -219,7 +229,7 @@
       timeoutHandlers.push(
         window.setTimeout(() => {
           endlessIntervalSearch(i, false);
-        }, config.interval_sec * 1000)
+        }, (results[i].item.condition.interval_sec ?? config.interval_sec) * 1000)
       );
     };
 

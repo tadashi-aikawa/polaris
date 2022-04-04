@@ -7,9 +7,18 @@ use tauri::api::path::home_dir;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub slack_token: String,
-    pub queries: Vec<String>,
     pub interval_sec: i32,
-    pub include_me: bool,
+    pub conditions: Vec<Condition>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Condition {
+    pub title: Option<String>,
+    pub color: Option<String>,
+    pub query: String,
+    pub interval_sec: Option<i32>,
+    pub should_notify: Option<bool>,
+    pub include_me: Option<bool>,
 }
 
 pub fn load() -> Result<Config> {

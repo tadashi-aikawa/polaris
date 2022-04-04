@@ -1,5 +1,15 @@
+import type { Nullable } from "owlelia";
+
 export interface Response {
-  queries: string[];
   interval_sec: number;
-  include_me: boolean;
+  conditions: Condition[];
+}
+
+export interface Condition {
+  title: Nullable<string>;
+  color: Nullable<string>;
+  query: string;
+  interval_sec: Nullable<number>;
+  should_notify: Nullable<boolean>;
+  include_me: Nullable<boolean>;
 }

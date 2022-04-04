@@ -32,7 +32,7 @@
         loadingText = "Load emoji list";
         emojiMap.set((await invoke<EmojiResponse>("fetch_emoji_list")).emoji);
 
-        loadingText = "Load user list";
+        loadingText = "Load user list (It will take few seconds)";
         userMap.set(
           (await invoke<AllUsersResponse>("fetch_all_users")).user_by_id
         );
