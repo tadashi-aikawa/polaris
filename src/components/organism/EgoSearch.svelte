@@ -7,12 +7,15 @@
     size="small"
     icon={CheckmarkOutline32}
     on:click={handleClickMarkAsReadAll}>Mark all as read</Button>
+  <Button size="small" icon={Search32} on:click={handleClickReloadConfig}
+    >Reload config</Button>
 </div>
 <div style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
   <Tabs autoWidth>
     {#each results as r}
       <Tab>
-        <div style="display: flex; align-items: center; height: 26px">
+        <div
+          style="display: flex; align-items: center; height: 26px; padding-bottom: 10px;">
           <span style="margin-right: 3px;">{r.item.query}</span>
           {#if r.loading}
             <InlineLoading />
@@ -30,20 +33,22 @@
           <InlineNotification title="Error" subtitle={r.error} />
         {/if}
         <TabContent>
-          <Button
-            kind="ghost"
-            size="small"
-            icon={Search32}
-            on:click={() => handleClickSearchByCurrentQuery(i)}
-            >Search by a current query</Button>
-          {#if unreadMessages(r.item.messages).length > 0}
+          <div style="margin-bottom: 10px">
             <Button
-              kind="danger-ghost"
+              kind="ghost"
               size="small"
-              icon={CheckmarkOutline32}
-              on:click={() => handleClickMarkAsReadItem(r.item)}
-              >Mark messages in this tab as read</Button>
-          {/if}
+              icon={Search32}
+              on:click={() => handleClickSearchByCurrentQuery(i)}
+              >Search by a current query</Button>
+            {#if unreadMessages(r.item.messages).length > 0}
+              <Button
+                kind="danger-ghost"
+                size="small"
+                icon={CheckmarkOutline32}
+                on:click={() => handleClickMarkAsReadItem(r.item)}
+                >Mark messages in this tab as read</Button>
+            {/if}
+          </div>
           <div
             style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
             {#if unreadMessages(r.item.messages).length === 0}
@@ -99,13 +104,9 @@
   import { Search32, CheckmarkOutline32 } from "carbon-icons-svelte";
   import { AsyncResult, DateTime, fromPromise, Nullable } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { fade, fly } from "svelte/transition";
   import { flip } from "svelte/animate";
-
-  export let queries: string[];
-  export let intervalSec: number;
-  export let includeMe: boolean;
 
   type Item = { query: string; messages: Message[]; lastSearchDate?: DateTime };
   type LiquidValue = {
@@ -114,13 +115,15 @@
     error: Nullable<string>;
   };
 
+  let config: Config = {
+    queries: [],
+    interval_sec: 60 * 10,
+    include_me: false,
+  };
+
   let readById: { [messageId: string]: DateTime } = {};
   let lastMessageIdByQuery: { [query: string]: Message["id"] } = {};
-  let results: LiquidValue[] = queries.map((query) => ({
-    item: { query, messages: [] },
-    loading: false,
-    error: null,
-  }));
+  let results: LiquidValue[] = [];
 
   $: unreadMessages = (messages: Message[]) =>
     messages.filter((x) => !readById[x.id]);
@@ -146,7 +149,7 @@
   const searchItem = async (query: string): Promise<Item> => {
     return invoke<Response>("search_messages", {
       query: `${query} after:${DateTime.today().minusDays(2).displayDate}`,
-      excludeMe: !includeMe,
+      excludeMe: !config.include_me,
     }).then((r) => {
       return {
         query,
@@ -188,19 +191,52 @@
     }
   };
 
+  const loadConfig = async () => {
+    config = await invoke<Config>("get_config");
+    results = config.queries.map((query) => ({
+      item: { query, messages: [] },
+      loading: false,
+      error: null,
+    }));
+  };
+
+  const handleClickReloadConfig = async () => {
+    await invoke<void>("reload_config");
+    await loadConfig();
+    await subscribeSearchers();
+  };
+
   const handleClickSearch = searchAll;
 
-  onMount(async () => {
-    const eachIntervalSec = intervalSec / results.length;
+  let timeoutHandlers: number[] = [];
+  const subscribeSearchers = async () => {
+    timeoutHandlers.forEach((x) => window.clearTimeout(x));
+
+    const eachIntervalSec = config.interval_sec / results.length;
     const endlessIntervalSearch = async (i: number) => {
       await search(i, true);
-      await sleep(intervalSec * 1000);
-      endlessIntervalSearch(i);
+      timeoutHandlers.push(
+        window.setTimeout(() => {
+          endlessIntervalSearch(i);
+        }, config.interval_sec * 1000)
+      );
     };
 
-    for (let i = 0; i < results.length; i++) {
-      await sleep(eachIntervalSec * 1000);
-      endlessIntervalSearch(i);
-    }
+    results.forEach((_, i) =>
+      timeoutHandlers.push(
+        window.setTimeout(() => {
+          endlessIntervalSearch(i);
+        }, eachIntervalSec * 1000 * (i + 1))
+      )
+    );
+  };
+
+  onMount(async () => {
+    await loadConfig();
+    await subscribeSearchers();
+  });
+
+  onDestroy(() => {
+    timeoutHandlers.forEach((x) => window.clearTimeout(x));
   });
 </script>

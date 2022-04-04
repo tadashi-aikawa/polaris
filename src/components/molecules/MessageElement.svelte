@@ -36,6 +36,8 @@
     >{element.text ?? element.url}</Link>
 {:else if element.type === "user"}
   <UserMention {element} />
+{:else if element.type === "usergroup"}
+  <UserGroupMention {element} />
 {:else if element.type === "broadcast"}
   <span
     class="broadcast"
@@ -61,6 +63,7 @@
   import { Link } from "carbon-components-svelte";
   import Emoji from "~/components/atoms/Emoji.svelte";
   import UserMention from "~/components/atoms/UserMention.svelte";
+  import UserGroupMention from "~/components/atoms/UserGroupMention.svelte";
 
   export let element: Element;
 </script>

@@ -88,6 +88,8 @@ pub enum Element {
     Link { url: String, text: Option<String> },
     #[serde(rename = "user")]
     User { user_id: String },
+    #[serde(rename = "usergroup")]
+    UserGroup { usergroup_id: String },
     #[serde(rename = "broadcast")]
     Broadcast { range: String },
     #[serde(rename = "channel")]
