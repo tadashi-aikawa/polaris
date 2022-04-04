@@ -1,8 +1,8 @@
 name: "release"
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - release
 
 jobs:
   release:
@@ -33,7 +33,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag: "${{ github.ref }}"
+        tagName: "__VERSION__"
         releaseName: "Vigilancia v__VERSION__"
         releaseDraft: true
     - name: "Discord notification (not success)"
