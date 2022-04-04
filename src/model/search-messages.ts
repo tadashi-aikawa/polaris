@@ -26,6 +26,11 @@ export type EmojiElement = {
   name: string;
 };
 
+export type UserElement = {
+  type: "user";
+  user_id: string;
+};
+
 export type Element =
   | {
       type: "rich_text_section";
@@ -57,10 +62,7 @@ export type Element =
       url: string;
       text: Nullable<string>;
     }
-  | {
-      type: "user";
-      user_id: string;
-    }
+  | UserElement
   | {
       type: "broadcast";
       range: "channel" | "here";

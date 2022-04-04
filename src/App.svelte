@@ -20,7 +20,8 @@
   import EgoSearch from "~/components/organism/EgoSearch.svelte";
   import type { Response as Config } from "~/model/fetch-config";
   import type { Response as EmojiResponse } from "~/model/fetch-emoji-list";
-  import { emojiMap } from "~/stores";
+  import type { Response as AllUsersResponse } from "~/model/fetch-all-users";
+  import { emojiMap, userMap } from "~/stores";
 
   let initializePromise: Promise<Config> = Promise.resolve({
     queries: [],
@@ -33,6 +34,9 @@
       try {
         await invoke<void>("initialize");
         emojiMap.set((await invoke<EmojiResponse>("fetch_emoji_list")).emoji);
+        userMap.set(
+          (await invoke<AllUsersResponse>("fetch_all_users")).user_by_id
+        );
         resolve(await invoke<Config>("fetch_config"));
       } catch (e) {
         reject(e);

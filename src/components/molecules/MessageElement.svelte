@@ -35,10 +35,7 @@
   <Link target="_blank" class="link" href={element.url}
     >{element.text ?? element.url}</Link>
 {:else if element.type === "user"}
-  <span class="user">
-    @{element.user_id}
-  </span>
-  <!--    TODO: ユーザー名を表示-->
+  <UserMention {element} />
 {:else if element.type === "broadcast"}
   <span
     class="broadcast"
@@ -63,6 +60,7 @@
   import MessageElement from "~/components/molecules/MessageElement.svelte";
   import { Link } from "carbon-components-svelte";
   import Emoji from "~/components/atoms/Emoji.svelte";
+  import UserMention from "~/components/atoms/UserMention.svelte";
 
   export let element: Element;
 </script>
@@ -104,11 +102,6 @@
   }
   .link {
     font-size: 15px;
-  }
-  .user {
-    color: dodgerblue;
-    background-color: powderblue;
-    margin-right: 3px;
   }
   .channel {
     color: dodgerblue;

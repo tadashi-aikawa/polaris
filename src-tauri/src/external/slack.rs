@@ -5,6 +5,7 @@ use serde::Serialize;
 pub mod emoji_list;
 pub mod search_messages;
 pub mod users_profile_get;
+pub mod users_list;
 
 pub struct SlackClient {
     base_url: String,
@@ -34,6 +35,10 @@ impl SlackClient {
 
     pub async fn emoji_list(&self) -> Result<emoji_list::Response, Error> {
         self.get_request("/emoji.list", &[("", "")]).await
+    }
+
+    pub async fn users_list(&self, cursor: &str) -> Result<users_list::Response, Error> {
+        self.get_request("/users.list", &[("cursor", cursor)]).await
     }
 
     async fn get_request<T: Serialize + ?Sized, R: DeserializeOwned>(
