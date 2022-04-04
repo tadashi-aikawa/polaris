@@ -11,15 +11,27 @@
     >Reload config</Button>
 </div>
 <div style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
+  {#if unreadResults.length === 0}
+    <div
+      transition:fade
+      style="display: flex; justify-content: center; align-items: center; flex-direction: column; padding-top: 25vh">
+      <img
+        src="https://github.com/tadashi-aikawa/vigilancia/raw/master/src-tauri/icons/128x128@2x.png" />
+      <span style="font-size: 24px; font-weight: bolder; color: mediumpurple">
+        There are no beneficial messages. No worries!
+      </span>
+    </div>
+  {/if}
+
   <Tabs autoWidth>
-    {#each results as r}
+    {#each unreadResults as r}
       <Tab>
         <div
           style="display: flex; align-items: center; height: 26px; padding-bottom: 10px;">
           <span style="margin-right: 3px;">{r.item.query}</span>
           {#if r.loading}
             <InlineLoading />
-          {:else if unreadMessages(r.item.messages).length > 0}
+          {:else}
             <Tag type="cyan" size="sm"
               >{unreadMessages(r.item.messages).length}</Tag>
           {/if}
@@ -28,11 +40,11 @@
     {/each}
 
     <svelte:fragment slot="content">
-      {#each results as r, i}
-        {#if r.error}
-          <InlineNotification title="Error" subtitle={r.error} />
-        {/if}
+      {#each unreadResults as r, i}
         <TabContent>
+          {#if r.error}
+            <InlineNotification title="Error" subtitle={r.error} />
+          {/if}
           <div style="margin-bottom: 10px">
             <Button
               kind="ghost"
@@ -40,36 +52,15 @@
               icon={Search32}
               on:click={() => handleClickSearchByCurrentQuery(i)}
               >Search by a current query</Button>
-            {#if unreadMessages(r.item.messages).length > 0}
-              <Button
-                kind="danger-ghost"
-                size="small"
-                icon={CheckmarkOutline32}
-                on:click={() => handleClickMarkAsReadItem(r.item)}
-                >Mark messages in this tab as read</Button>
-            {/if}
+            <Button
+              kind="danger-ghost"
+              size="small"
+              icon={CheckmarkOutline32}
+              on:click={() => handleClickMarkAsReadItem(r.item)}
+              >Mark messages in this tab as read</Button>
           </div>
           <div
             style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
-            {#if unreadMessages(r.item.messages).length === 0}
-              <div
-                transition:fade
-                style="display: flex; justify-content: center; align-items: center; flex-direction: column; padding-top: 60px">
-                <img
-                  src="https://github.com/tadashi-aikawa/vigilancia/raw/master/src-tauri/icons/128x128@2x.png" />
-                {#if r.item.lastSearchDate}
-                  <span style="font-size: 18px; color: mediumpurple">
-                    There are no new beneficial messages since
-                    {r.item.lastSearchDate.displayDateTime}
-                  </span>
-                {:else}
-                  <span style="font-size: 18px; color: mediumpurple">
-                    You should wait until starting the initial search or click
-                    the search button immediately
-                  </span>
-                {/if}
-              </div>
-            {/if}
             {#each unreadMessages(r.item.messages) as message, i (message)}
               <div
                 style="padding: 5px;"
@@ -127,6 +118,9 @@
 
   $: unreadMessages = (messages: Message[]) =>
     messages.filter((x) => !readById[x.id]);
+  $: unreadResults = results.filter(
+    (x) => unreadMessages(x.item.messages).length > 0
+  );
 
   const markAsRead = async (message: Message) => {
     readById[message.id] = DateTime.now();
