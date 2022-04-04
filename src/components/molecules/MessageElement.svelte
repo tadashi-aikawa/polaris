@@ -1,127 +1,42 @@
 {#if element.type === "rich_text_section"}
-  {#each element.elements as e}
-    <MessageElement element={e} />
-  {/each}
+  <RichTextSection {element} />
 {:else if element.type === "rich_text_quote"}
-  <div class="cite">
-    {#each element.elements as e}
-      <MessageElement element={e} />
-    {/each}
-  </div>
+  <RichTextQuote {element} />
 {:else if element.type === "rich_text_list"}
-  <ul class="ul" style="margin-left: {20 * element.indent}px">
-    {#each element.elements as e}
-      <li class="li">
-        <MessageElement element={e} />
-      </li>
-    {/each}
-  </ul>
+  <RichTextList {element} />
 {:else if element.type === "rich_text_preformatted"}
-  <div class="pre">
-    {#each element.elements as e}
-      <MessageElement element={e} />
-    {/each}
-  </div>
+  <RichTextPreformatted {element} />
 {:else if element.type === "emoji"}
   <Emoji {element} />
 {:else if element.type === "text"}
-  <span
-    class="text"
-    class:bold={element.style?.bold}
-    class:code={element.style?.code}>
-    {element.text}
-  </span>
+  <Text {element} />
 {:else if element.type === "link"}
-  <Link target="_blank" class="link" href={element.url}
-    >{element.text ?? element.url}</Link>
+  <Link {element} />
 {:else if element.type === "user"}
   <UserMention {element} />
 {:else if element.type === "usergroup"}
   <UserGroupMention {element} />
 {:else if element.type === "broadcast"}
-  <span
-    class="broadcast"
-    class:bold={element.style?.bold}
-    class:code={element.style?.code}>
-    @{element.range}
-  </span>
+  <Broadcast {element} />
 {:else if element.type === "channel"}
-  <span
-    class="channel"
-    class:bold={element.style?.bold}
-    class:code={element.style?.code}>
-    #{element.channel_id}
-    <!--    TODO: channel名を表示-->
-  </span>
+  <Channel {element} />
 {:else}
   <li>{element.type}</li>
 {/if}
 
 <script lang="ts">
   import type { Element } from "~/model/search-messages";
-  import MessageElement from "~/components/molecules/MessageElement.svelte";
-  import { Link } from "carbon-components-svelte";
-  import Emoji from "~/components/atoms/Emoji.svelte";
-  import UserMention from "~/components/atoms/UserMention.svelte";
-  import UserGroupMention from "~/components/atoms/UserGroupMention.svelte";
+  import Emoji from "~/components/elements/Emoji.svelte";
+  import UserMention from "~/components/elements/UserMention.svelte";
+  import UserGroupMention from "~/components/elements/UserGroupMention.svelte";
+  import RichTextSection from "~/components/elements/RichTextSection.svelte";
+  import RichTextQuote from "~/components/elements/RichTextQuote.svelte";
+  import RichTextList from "~/components/elements/RichTextList.svelte";
+  import RichTextPreformatted from "~/components/elements/RichTextPreformatted.svelte";
+  import Text from "~/components/elements/Text.svelte";
+  import Link from "~/components/elements/Link.svelte";
+  import Broadcast from "~/components/elements/Broadcast.svelte";
+  import Channel from "~/components/elements/Channel.svelte";
 
   export let element: Element;
 </script>
-
-<style>
-  .text {
-    font-size: inherit;
-    line-height: inherit;
-  }
-  .bold {
-    font-weight: bold;
-  }
-  .pre {
-    font-family: monospace;
-    font-size: 85%;
-    line-height: 16px;
-    white-space: pre-wrap;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 7px;
-    border: solid 1px lightgrey;
-    background-color: ghostwhite;
-    vertical-align: baseline;
-  }
-  .code {
-    color: #c7254e;
-    background-color: #eee8d5;
-    font-size: 90%;
-    padding: 2px;
-    margin: 2px;
-    border-radius: 5px;
-    vertical-align: baseline;
-  }
-  .cite {
-    padding: 5px 20px 5px 20px;
-    margin: 10px;
-    border: 0 solid grey;
-    border-left-width: 5px;
-  }
-  .link {
-    font-size: 15px;
-  }
-  .channel {
-    color: dodgerblue;
-    background-color: powderblue;
-    margin-right: 3px;
-  }
-  .broadcast {
-    font-weight: bold;
-    background-color: #ffdb79;
-    margin-right: 3px;
-  }
-
-  .ul {
-    padding-left: 25px;
-  }
-  .li {
-    list-style: disc;
-    line-height: 22px;
-  }
-</style>

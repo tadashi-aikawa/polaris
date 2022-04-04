@@ -21,9 +21,57 @@ export interface Block {
   elements: Element[];
 }
 
+export type Element =
+  | RichTextSectionElement
+  | RichTextQuoteElement
+  | RichTextListElement
+  | RichTextPreformattedElement
+  | EmojiElement
+  | TextElement
+  | LinkElement
+  | UserElement
+  | UserGroupElement
+  | BroadcastElement
+  | ChannelElement;
+
+export type RichTextSectionElement = {
+  type: "rich_text_section";
+  elements: Element[];
+};
+
+export type RichTextQuoteElement = {
+  type: "rich_text_quote";
+  elements: Element[];
+};
+
+export type RichTextListElement = {
+  type: "rich_text_list";
+  style: "bullet";
+  indent: number;
+  elements: Element[];
+};
+
+export type RichTextPreformattedElement = {
+  type: "rich_text_preformatted";
+  border: number;
+  elements: Element[];
+};
+
 export type EmojiElement = {
   type: "emoji";
   name: string;
+};
+
+export type TextElement = {
+  type: "text";
+  text: string;
+  style: Nullable<Style>;
+};
+
+export type LinkElement = {
+  type: "link";
+  url: string;
+  text: Nullable<string>;
 };
 
 export type UserElement = {
@@ -36,48 +84,17 @@ export type UserGroupElement = {
   usergroup_id: string;
 };
 
-export type Element =
-  | {
-      type: "rich_text_section";
-      elements: Element[];
-    }
-  | {
-      type: "rich_text_quote";
-      elements: Element[];
-    }
-  | {
-      type: "rich_text_list";
-      style: "bullet";
-      indent: number;
-      elements: Element[];
-    }
-  | {
-      type: "rich_text_preformatted";
-      border: number;
-      elements: Element[];
-    }
-  | EmojiElement
-  | {
-      type: "text";
-      text: string;
-      style: Nullable<Style>;
-    }
-  | {
-      type: "link";
-      url: string;
-      text: Nullable<string>;
-    }
-  | UserElement
-  | UserGroupElement
-  | {
-      type: "broadcast";
-      range: "channel" | "here";
-    }
-  | {
-      type: "channel";
-      channel_id: string;
-      style: Nullable<Style>;
-    };
+export type BroadcastElement = {
+  type: "broadcast";
+  range: "channel" | "here";
+  style: Nullable<Style>;
+};
+
+export type ChannelElement = {
+  type: "channel";
+  channel_id: string;
+  style: Nullable<Style>;
+};
 
 export interface Style {
   code: Nullable<boolean>;
