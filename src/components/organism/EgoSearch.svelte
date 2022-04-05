@@ -248,6 +248,7 @@
   };
 
   onMount(async () => {
+    timeoutHandlers.forEach((x) => window.clearTimeout(x));
     await loadConfig();
     await subscribeSearchers();
   });
