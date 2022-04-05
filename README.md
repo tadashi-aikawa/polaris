@@ -29,6 +29,7 @@ Vigilancia is a desktop application for Slack core user who desires to find bene
 {
   "slack_token": "xoxp-....................", // 【必須】OAuthトークン
   "interval_sec": 600, // 【必須】条件ごとに巡回する間隔のデフォルト値 (秒)
+  "since_day_ago": 1, // 【任意】何日前よりあとを検索するか (0は今日のみ) (1は昨日と今日) (デフォルト2)
   "conditions": [  // 【必須】条件 (それぞれが1タブに相当)
     {
       "query": "@tadashi-aikawa", // 【必須】Slackの検索クエリ

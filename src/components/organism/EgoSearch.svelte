@@ -158,7 +158,7 @@
   const searchItem = async (condition: Condition): Promise<Item> => {
     return invoke<Response>("search_messages", {
       query: `${condition.query} after:${
-        DateTime.today().minusDays(2).displayDate
+        DateTime.today().minusDays(1 + config.since_day_ago ?? 1).displayDate
       }`,
       excludeMe: !condition.include_me,
     }).then((r) => {

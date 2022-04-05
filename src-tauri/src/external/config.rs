@@ -9,6 +9,7 @@ pub struct Config {
     pub slack_token: String,
     pub interval_sec: i32,
     pub conditions: Vec<Condition>,
+    pub since_day_ago: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
