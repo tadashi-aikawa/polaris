@@ -1,6 +1,6 @@
 <ul class="ul" style="margin-left: {20 * element.indent}px">
   {#each element.elements as e}
-    <li class="li">
+    <li class={element.style}>
       <MessageElement element={e} />
     </li>
   {/each}
@@ -17,8 +17,15 @@
   .ul {
     padding-left: 25px;
   }
-  .li {
+
+  /*noinspection CssUnusedSymbol*/
+  .bullet {
     list-style: disc;
+    line-height: 22px;
+  }
+  /*noinspection CssUnusedSymbol*/
+  .ordered {
+    list-style: decimal;
     line-height: 22px;
   }
 </style>

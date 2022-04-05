@@ -36,7 +36,7 @@ pub struct Message {
     /// ex: 123.45678
     pub score: f64,
     /// ex: U1ABCDE3
-    pub user: String,
+    pub user: Option<String>,
     /// ex: tadashi-aikawa
     pub username: String,
     /// ex: 1647445574.312239
@@ -62,7 +62,7 @@ pub struct Block {
     #[serde(rename = "type")]
     pub block_type: String,
     pub block_id: String,
-    pub elements: Vec<Element>,
+    pub elements: Option<Vec<Element>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -109,4 +109,6 @@ pub struct Style {
 pub enum ListStyle {
     #[serde(rename = "bullet")]
     Bullet,
+    #[serde(rename = "ordered")]
+    Ordered,
 }

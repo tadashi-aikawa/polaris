@@ -18,7 +18,7 @@ export interface Message {
 export interface Block {
   block_type: string;
   block_id: string;
-  elements: Element[];
+  elements: Nullable<Element[]>;
 }
 
 export type Element =
@@ -46,7 +46,7 @@ export type RichTextQuoteElement = {
 
 export type RichTextListElement = {
   type: "rich_text_list";
-  style: "bullet";
+  style: "bullet" | "ordered";
   indent: number;
   elements: Element[];
 };

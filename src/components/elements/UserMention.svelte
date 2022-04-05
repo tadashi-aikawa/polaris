@@ -1,6 +1,8 @@
-<span class="user">
-  @{user.name}
-</span>
+{#if user}
+  <span class="user">
+    @{user.name}
+  </span>
+{/if}
 
 <script lang="ts">
   import { userMap } from "~/stores";

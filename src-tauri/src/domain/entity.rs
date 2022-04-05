@@ -25,7 +25,7 @@ impl From<slack::users_profile_get::Profile> for User {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Message {
     pub id: String,
-    pub user_id: String,
+    pub user_id: Option<String>,
     pub user_name: String,
     pub channel_name: String,
     pub text: String,

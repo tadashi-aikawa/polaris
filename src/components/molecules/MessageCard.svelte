@@ -9,7 +9,7 @@
         <div style="white-space: pre-wrap; line-height: normal;">
           {#if message.blocks}
             {#each message.blocks as block}
-              {#each block.elements as element}
+              {#each block.elements ?? [] as element}
                 <MessageElement {element} />
               {/each}
             {/each}
