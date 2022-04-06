@@ -18,5 +18,6 @@
     color: dodgerblue;
     background-color: powderblue;
     margin-right: 3px;
+    line-height: 30px;
   }
 </style>
