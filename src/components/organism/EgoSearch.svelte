@@ -21,7 +21,8 @@
       transition:fade
       style="display: flex; justify-content: center; align-items: center; flex-direction: column; padding-top: 25vh">
       <img
-        src="https://github.com/tadashi-aikawa/vigilancia/raw/master/src-tauri/icons/128x128@2x.png" />
+        src="https://github.com/tadashi-aikawa/vigilancia/raw/master/src-tauri/icons/128x128@2x.png"
+        alt="vigilancia" />
       <span style="font-size: 24px; font-weight: bolder; color: mediumpurple">
         There are no beneficial messages. No worries!
       </span>
