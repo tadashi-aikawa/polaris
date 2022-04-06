@@ -3,12 +3,14 @@
     <img
       src={$emojiMap[emojiUrl.replace("alias:", "")]}
       style="vertical-align: middle"
+      width="24px"
       height="24px"
       alt={$emojiMap[emojiUrl.replace("alias:", "")]} />
   {:else}
     <img
       src={emojiUrl}
       style="vertical-align: middle"
+      width="24px"
       height="24px"
       alt={emojiUrl} />
   {/if}

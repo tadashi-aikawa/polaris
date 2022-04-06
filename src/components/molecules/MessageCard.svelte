@@ -6,7 +6,8 @@
           userId={message.user_id}
           createdAt={message.created_at}
           channelName={message.channel_name} />
-        <div style="white-space: pre-wrap; line-height: normal;">
+
+        <div class="message-element-wrapper">
           {#if message.blocks}
             {#each message.blocks as block}
               {#each block.elements ?? [] as element}
@@ -17,6 +18,46 @@
             <span>{message.text}</span>
           {/if}
         </div>
+
+        {#each message.attachments ?? [] as ma}
+          {#each ma.message_blocks ?? [] as mb}
+            <div class="attachment">
+              <div style="display: flex; align-items: center; gap: 5px;">
+                <img
+                  src={ma.author_icon}
+                  alt={ma.author_name ?? ma.author_subname}
+                  width="20" />
+                <span style="font-size: 14px; font-weight: bolder">
+                  {ma.author_name ?? ma.author_subname}
+                </span>
+              </div>
+
+              {#each mb.message.blocks as b}
+                <div class="message-element-wrapper">
+                  {#each b.elements ?? [] as element}
+                    <MessageElement {element} />
+                  {/each}
+                </div>
+                <div
+                  style="color: dimgrey; font-size: 90%; display: flex; align-items: center; gap: 3px">
+                  {#if ma.from_url}
+                    <TooltipIcon
+                      tooltipText="Open in Slack"
+                      size="small"
+                      direction="right"
+                      icon={Launch16}
+                      style="cursor: pointer;"
+                      on:click={() => {
+                        shell.open(ma.from_url);
+                      }} />
+                  {/if}
+                  #{ma.channel_name} | {DateTime.of(Number(mb.ts))
+                    .displayDateTime}
+                </div>
+              {/each}
+            </div>
+          {/each}
+        {/each}
       </div>
 
       <div style="display: flex; gap: 15px;">
@@ -41,12 +82,13 @@
 <script lang="ts">
   import { shell } from "@tauri-apps/api";
   import { Tile, TooltipIcon } from "carbon-components-svelte";
-  import { Launch20, CheckmarkOutline32 } from "carbon-icons-svelte";
+  import { Launch20, Launch16, CheckmarkOutline32 } from "carbon-icons-svelte";
 
   import type { Message } from "~/model/search-messages";
   import { createEventDispatcher } from "svelte";
   import MessageElement from "~/components/molecules/MessageElement.svelte";
   import MessageHeader from "~/components/molecules/MessageHeader.svelte";
+  import { DateTime } from "owlelia";
 
   export let message: Message;
 
@@ -77,5 +119,17 @@
   }
   .read-button:hover {
     background-color: rgba(144, 188, 144, 0.4);
+  }
+  .attachment {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    border: solid 2px lightgrey;
+    border-radius: 10px;
+  }
+  .message-element-wrapper {
+    white-space: pre-wrap;
+    line-height: normal;
   }
 </style>

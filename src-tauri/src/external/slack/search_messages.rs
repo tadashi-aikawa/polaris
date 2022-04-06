@@ -47,14 +47,63 @@ pub struct Message {
     pub text: String,
     /// ex: https://hoge.slack.com/archives/U1ABCDE3/p123456789012345678
     pub permalink: String,
+    /// アタッチメント
+    pub attachments: Option<Vec<Attachment>>,
     /// ブロック
     pub blocks: Option<Vec<Block>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Attachment {
+    from_url: Option<String>,
+    ts: Option<String>,
+    author_id: Option<String>,
+    channel_team: Option<String>,
+    channel_id: Option<String>,
+    channel_name: Option<String>,
+    is_msg_unfurl: Option<bool>,
+    message_blocks: Option<Vec<MessageBlockElement>>,
+    id: Option<i64>,
+    original_url: Option<String>,
+    fallback: String,
+    text: Option<String>,
+    author_name: Option<String>,
+    author_link: Option<String>,
+    author_icon: Option<String>,
+    author_subname: Option<String>,
+    // mrkdwn_in: Option<Vec<MrkdwnIn>>,
+    footer: Option<String>,
+    service_icon: Option<String>,
+    title: Option<String>,
+    title_link: Option<String>,
+    service_name: Option<String>,
+    msg_subtype: Option<String>,
+    // blocks: Option<Vec<AttachmentBlock>>,
+    color: Option<String>,
+    bot_id: Option<String>,
+    app_unfurl_url: Option<String>,
+    is_app_unfurl: Option<bool>,
+    app_id: Option<String>,
+    footer_icon: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MessageBlockElement {
+    pub team: String,
+    pub channel: String,
+    pub ts: String,
+    pub message: MessageBlock,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Channel {
     pub id: String,
     pub name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MessageBlock {
+    pub blocks: Vec<Block>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

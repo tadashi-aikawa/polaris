@@ -1,5 +1,5 @@
 use crate::external::slack;
-use crate::external::slack::search_messages::Block;
+use crate::external::slack::search_messages::{Attachment, Block};
 use chrono::{DateTime, Local, TimeZone};
 use serde::{Deserialize, Serialize};
 
@@ -31,6 +31,7 @@ pub struct Message {
     pub text: String,
     pub permalink: String,
     pub created_at: DateTime<Local>,
+    pub attachments: Option<Vec<Attachment>>,
     pub blocks: Option<Vec<Block>>,
 }
 
@@ -47,6 +48,7 @@ impl From<&slack::search_messages::Message> for Message {
             text: m.text.clone(),
             permalink: m.permalink.clone(),
             created_at: Local.timestamp(sec, 0),
+            attachments: m.attachments.clone(),
             blocks: m.blocks.clone(),
         }
     }

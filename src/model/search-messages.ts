@@ -12,7 +12,27 @@ export interface Message {
   text: string;
   permalink: string;
   created_at: string;
+  attachments: Nullable<Attachment[]>;
   blocks: Nullable<Block[]>;
+}
+
+// なんとか共用体にしたい
+export interface Attachment {
+  from_url: Nullable<string>;
+  author_name: Nullable<string>;
+  author_subname: Nullable<string>;
+  author_icon: Nullable<string>;
+  channel_name: string;
+  message_blocks: Nullable<MessageBlockElement[]>;
+}
+
+export interface MessageBlockElement {
+  team: string;
+  channel: string;
+  ts: string;
+  message: {
+    blocks: Block[];
+  };
 }
 
 export interface Block {
