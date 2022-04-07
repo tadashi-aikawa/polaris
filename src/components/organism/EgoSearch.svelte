@@ -66,6 +66,11 @@
               icon={CheckmarkOutline32}
               on:click={() => handleClickMarkAsReadItem(r.item)}
               >Mark messages in this tab as read</Button>
+            {#each unreadMessages(r.item.messages) as message, i (message)}
+              <span style="margin: 0 1px">
+                <UserImage userId={message.user_id} size="24" />
+              </span>
+            {/each}
           </div>
           <div
             style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
@@ -100,6 +105,7 @@
   import { Message, Response } from "~/model/search-messages";
   import { Response as Config, Condition } from "~/model/fetch-config";
   import MessageCard from "~/components/molecules/MessageCard.svelte";
+  import UserImage from "~/components/atoms/UserImage.svelte";
   import { sleep } from "~/utils/time";
   import {
     ProgressBarRound32,

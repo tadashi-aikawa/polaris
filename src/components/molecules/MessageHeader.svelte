@@ -1,9 +1,6 @@
 {#if user}
   <div style="display: flex; gap: 10px;">
-    <img
-      src={user.images.image_512}
-      alt={user.real_name}
-      style="border-radius: 5px; height: 48px;" />
+    <UserImage {user} size="48" />
     <div style="flex-direction: row; padding-top: 5px;">
       <span style="font-weight: bold; font-size: 16px">{user.real_name}</span>
       <span style="font-size: 14px; margin-left: 5px; color: dimgrey">
@@ -20,6 +17,7 @@
 <script lang="ts">
   import { userMap } from "~/stores";
   import { DateTime } from "owlelia";
+  import UserImage from "~/components/atoms/UserImage.svelte";
 
   export let userId: string;
   export let createdAt: string;
