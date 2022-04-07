@@ -56,7 +56,8 @@ pub struct Message {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Attachment {
     from_url: Option<String>,
-    ts: Option<String>,
+    // XXX: 今は使われていないので適当に回避. 種別によってf64とStringどちらが入るかが変わる
+    ts: Option<serde_json::Value>,
     author_id: Option<String>,
     channel_team: Option<String>,
     channel_id: Option<String>,
@@ -85,6 +86,9 @@ pub struct Attachment {
     is_app_unfurl: Option<bool>,
     app_id: Option<String>,
     footer_icon: Option<String>,
+    image_url: Option<String>,
+    image_width: Option<i32>,
+    image_height: Option<i32>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

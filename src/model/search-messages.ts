@@ -24,6 +24,13 @@ export interface Attachment {
   author_icon: Nullable<string>;
   channel_name: string;
   message_blocks: Nullable<MessageBlockElement[]>;
+  // service
+  image_url: Nullable<string>;
+  image_width: Nullable<number>;
+  image_height: Nullable<number>;
+  text: Nullable<string>;
+  footer: Nullable<string>;
+  footer_icon: Nullable<string>;
 }
 
 export interface MessageBlockElement {
