@@ -64,3 +64,8 @@ task build
 # Development build
 task dev
 ```
+
+```
+# Release
+task release VERSION=1.2.3
+```
