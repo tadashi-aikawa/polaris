@@ -24,3 +24,23 @@ tasks:
     desc: 製品ビルド
     cmds:
       - npm run tauri build
+
+  release:
+    desc: |
+      Build
+          ∟ [Ex] task release VERSION=1.2.3
+    cmds:
+      - git checkout release
+      - git rebase origin/master
+      - |
+        sed -i -r 's/\"version\": \".+\"/\"version\": \"{{.VERSION}}\"/g' src-tauri/tauri.conf.json
+      - git add src-tauri/tauri.conf.json
+      - git commit -m "v{{.VERSION}}"
+      - git push
+      - git checkout master
+      - git pull
+      - git merge --no-ff release
+      - git push
+    preconditions:
+      - sh: "[ {{.VERSION}} != '' ]"
+        msg: "VERSION is required."
