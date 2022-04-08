@@ -64,7 +64,7 @@
               style="cursor: pointer; margin-left: 30px;"
               tooltipText="Search by a current query"
               on:click={() => handleClickSearchByCurrentQuery(i)}>
-              <Search24 style="fill: darkgreen" />
+              <ProgressBarRound24 style="fill: darkgreen" />
             </TooltipIcon>
             <TooltipIcon
               size="small"
@@ -111,8 +111,8 @@
   import MessageCard from "~/components/molecules/MessageCard.svelte";
   import UserImage from "~/components/atoms/UserImage.svelte";
   import {
+    ProgressBarRound24,
     ProgressBarRound32,
-    Search24,
     CheckmarkOutline24,
     CheckmarkOutline32,
   } from "carbon-icons-svelte";
