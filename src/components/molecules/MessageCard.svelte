@@ -1,44 +1,44 @@
 <Tile style="padding: 0">
-  <div class="vertical-space">
-    <div class="main">
-      <div style="display: flex; flex-direction: column; gap: 15px;">
-        <MessageHeader
-          userId={message.user_id}
-          createdAt={message.created_at}
-          channelName={message.channel_name} />
-
-        <div class="message-element-wrapper">
-          {#if message.blocks}
-            {#each message.blocks as block}
-              {#each block.elements ?? [] as element}
-                <MessageElement {element} />
-              {/each}
-            {/each}
-          {:else}
-            <span>{message.text}</span>
-          {/if}
-        </div>
-
-        {#each message.attachments ?? [] as ma}
-          <MessageAttachment attachment={ma} />
-        {/each}
-      </div>
-
-      <div style="display: flex; gap: 15px;">
-        <TooltipIcon
-          tooltipText="Open in Slack"
-          size="small"
-          direction="right"
-          icon={Launch20}
-          style="cursor: pointer"
-          on:click={() => {
-            shell.open(message.permalink);
-          }} />
-      </div>
+  <div style="display: flex; flex-direction: row;">
+    <div class="read-button" on:click={handleClickRead}>
+      <CheckmarkOutline24 size="small" style="cursor: inherit" />
     </div>
 
-    <div class="read-button" on:click={handleClickRead}>
-      <CheckmarkOutline32 size="small" style="cursor: inherit" />
+    <div style="padding: 15px 15px 15px 0;">
+      <MessageHeader
+        userId={message.user_id}
+        createdAt={message.created_at}
+        channelName={message.channel_name} />
+
+      <div class="message-element-wrapper">
+        {#if message.blocks}
+          {#each message.blocks as block}
+            {#each block.elements ?? [] as element}
+              <MessageElement {element} />
+            {/each}
+          {/each}
+        {:else}
+          <span>{message.text}</span>
+        {/if}
+
+        {#each message.attachments ?? [] as ma}
+          <div style="margin: 5px 0">
+            <MessageAttachment attachment={ma} />
+          </div>
+        {/each}
+
+        <div style="display: flex; gap: 15px;">
+          <TooltipIcon
+            tooltipText="Open in Slack"
+            size="small"
+            direction="right"
+            icon={Launch20}
+            style="cursor: pointer"
+            on:click={() => {
+              shell.open(message.permalink);
+            }} />
+        </div>
+      </div>
     </div>
   </div>
 </Tile>
@@ -46,7 +46,7 @@
 <script lang="ts">
   import { shell } from "@tauri-apps/api";
   import { Tile, TooltipIcon } from "carbon-components-svelte";
-  import { Launch20, Launch16, CheckmarkOutline32 } from "carbon-icons-svelte";
+  import { Launch20, Launch16, CheckmarkOutline24 } from "carbon-icons-svelte";
 
   import type { Message } from "~/model/search-messages";
   import { createEventDispatcher } from "svelte";
@@ -64,23 +64,17 @@
 </script>
 
 <style>
-  .main {
-    display: flex;
-    flex-direction: column;
-    padding: 15px;
-    gap: 15px;
-  }
   .vertical-space {
     display: flex;
     flex-direction: row;
-    gap: 15px;
   }
   .read-button {
     display: flex;
     align-items: center;
     cursor: pointer;
-    margin-left: auto;
-    padding: 5px 15px;
+    padding: 0 10px;
+    margin-right: 5px;
+    color: darkgrey;
   }
   .read-button:hover {
     background-color: rgba(144, 188, 144, 0.4);
@@ -88,5 +82,6 @@
   .message-element-wrapper {
     white-space: pre-wrap;
     line-height: normal;
+    padding: 10px 0;
   }
 </style>
