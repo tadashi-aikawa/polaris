@@ -53,24 +53,28 @@
           {#if r.error}
             <InlineNotification title="Error" subtitle={r.error} />
           {/if}
-          <div style="margin-bottom: 10px">
-            <Button
-              kind="ghost"
-              size="small"
-              icon={Search32}
-              on:click={() => handleClickSearchByCurrentQuery(i)}
-              >Search by a current query</Button>
-            <Button
-              kind="danger-ghost"
-              size="small"
-              icon={CheckmarkOutline32}
-              on:click={() => handleClickMarkAsReadItem(r.item)}
-              >Mark messages in this tab as read</Button>
+          <div style="margin: 0 0 10px 15px">
             {#each unreadMessages(r.item.messages) as message, i (message)}
-              <span style="margin: 0 1px">
+              <span style="margin: 0 2px">
                 <UserImage userId={message.user_id} size="24" />
               </span>
             {/each}
+
+            <TooltipIcon
+              size="small"
+              style="cursor: pointer; margin-left: 30px;"
+              tooltipText="Search by a current query"
+              on:click={() => handleClickSearchByCurrentQuery(i)}>
+              <Search24 style="fill: darkgreen" />
+            </TooltipIcon>
+            <TooltipIcon
+              size="small"
+              style="cursor: pointer; margin-left: 10px;"
+              tooltipText="Mark messages in this tab as read"
+              icon={CheckmarkOutline24}
+              on:click={() => handleClickMarkAsReadItem(r.item)}>
+              <CheckmarkOutline24 style="fill: orangered" />
+            </TooltipIcon>
           </div>
           <div
             style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
@@ -93,6 +97,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/tauri";
   import {
+    TooltipIcon,
     Button,
     InlineNotification,
     Tab,
@@ -109,7 +114,8 @@
   import { sleep } from "~/utils/time";
   import {
     ProgressBarRound32,
-    Search32,
+    Search24,
+    CheckmarkOutline24,
     CheckmarkOutline32,
   } from "carbon-icons-svelte";
   import { AsyncResult, DateTime, fromPromise, Nullable } from "owlelia";
@@ -264,3 +270,13 @@
     timeoutHandlers.forEach((x) => window.clearTimeout(x));
   });
 </script>
+
+<style>
+  .action-icon-wrapper {
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  .action-icon-wrapper::hover {
+    background-color: rgba(144, 188, 144, 0.4);
+  }
+</style>

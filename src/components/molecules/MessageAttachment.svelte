@@ -1,45 +1,47 @@
 {#if attachment.message_blocks}
-  {#each attachment.message_blocks ?? [] as mb}
-    <div class="attachment">
-      <div style="display: flex; align-items: center; gap: 5px;">
-        <img
-          src={attachment.author_icon}
-          alt={attachment.author_name ?? attachment.author_subname}
-          width="20" />
-        <span style="font-size: 14px; font-weight: bolder">
-          {attachment.author_name ?? attachment.author_subname}
-        </span>
-      </div>
+  <div style="padding: 10px 0">
+    {#each attachment.message_blocks ?? [] as mb}
+      <div class="attachment">
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <img
+            src={attachment.author_icon}
+            alt={attachment.author_name ?? attachment.author_subname}
+            width="20" />
+          <span style="font-size: 14px; font-weight: bolder">
+            {attachment.author_name ?? attachment.author_subname}
+          </span>
+        </div>
 
-      {#each mb.message.blocks as b}
-        <div class="message-element-wrapper">
-          {#each b.elements ?? [] as element}
-            <MessageElement {element} />
-          {/each}
-        </div>
-        <div
-          style="color: dimgrey; font-size: 90%; display: flex; align-items: center; gap: 3px">
-          {#if attachment.from_url}
-            <TooltipIcon
-              tooltipText="Open in Slack"
-              size="small"
-              direction="right"
-              icon={Launch16}
-              style="cursor: pointer;"
-              on:click={() => {
-                shell.open(attachment.from_url);
-              }} />
-          {/if}
-          #{attachment.channel_name} | {DateTime.of(Number(mb.ts))
-            .displayDateTime}
-        </div>
-      {/each}
-    </div>
-  {/each}
+        {#each mb.message.blocks as b}
+          <div class="message-element-wrapper">
+            {#each b.elements ?? [] as element}
+              <MessageElement {element} />
+            {/each}
+          </div>
+          <div
+            style="color: dimgrey; font-size: 90%; display: flex; align-items: center; gap: 3px">
+            {#if attachment.from_url}
+              <TooltipIcon
+                tooltipText="Open in Slack"
+                size="small"
+                direction="right"
+                icon={Launch16}
+                style="cursor: pointer;"
+                on:click={() => {
+                  shell.open(attachment.from_url);
+                }} />
+            {/if}
+            #{attachment.channel_name} | {DateTime.of(Number(mb.ts))
+              .displayDateTime}
+          </div>
+        {/each}
+      </div>
+    {/each}
+  </div>
 {:else if attachment.image_url}
   <div
     class="cite"
-    style="display: flex; flex-direction: column; gap: 5px; max-width: 640px;">
+    style="display: flex; flex-direction: column; gap: 5px; max-width: 640px; padding: 0 10px;">
     <div style="display: flex; align-items: center; gap: 5px;">
       <img
         src={attachment.author_icon}
