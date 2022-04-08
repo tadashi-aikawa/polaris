@@ -1,4 +1,3 @@
-<!--suppress ALL -->
 <div style="display: flex; gap: 5px">
   <Button
     kind="danger"
@@ -111,14 +110,13 @@
   import { Response as Config, Condition } from "~/model/fetch-config";
   import MessageCard from "~/components/molecules/MessageCard.svelte";
   import UserImage from "~/components/atoms/UserImage.svelte";
-  import { sleep } from "~/utils/time";
   import {
     ProgressBarRound32,
     Search24,
     CheckmarkOutline24,
     CheckmarkOutline32,
   } from "carbon-icons-svelte";
-  import { AsyncResult, DateTime, fromPromise, Nullable } from "owlelia";
+  import { DateTime, Nullable } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
   import { onDestroy, onMount } from "svelte";
   import { fade, fly } from "svelte/transition";
@@ -138,10 +136,11 @@
   let config: Config = {
     interval_sec: 60 * 10,
     conditions: [],
+    since_day_ago: null,
   };
 
   let readById: { [messageId: string]: DateTime } = {};
-  let lastMessageIdByQuery: { [query: string]: Message["id"] } = {};
+  let lastMessageIdByQuery: { [query: string]: Nullable<Message["id"]> } = {};
   let results: LiquidValue[] = [];
 
   $: unreadMessages = (messages: Message[]) =>
@@ -191,6 +190,7 @@
       results[i].item = item;
 
       const latestMessageId = item.messages?.[0]?.id;
+      // noinspection OverlyComplexBooleanExpressionJS
       if (
         condition.should_notify &&
         !suppressNotify &&
@@ -212,12 +212,6 @@
     await search(i, false);
   };
 
-  const searchAll = async () => {
-    for (let i = 0; i < results.length; i++) {
-      await search(i, false);
-    }
-  };
-
   const loadConfig = async () => {
     config = await invoke<Config>("get_config");
     results = config.conditions.map((condition) => ({
@@ -232,8 +226,6 @@
     await loadConfig();
     await subscribeSearchers();
   };
-
-  const handleClickSearch = searchAll;
 
   let timeoutHandlers: number[] = [];
   const subscribeSearchers = async () => {
@@ -270,13 +262,3 @@
     timeoutHandlers.forEach((x) => window.clearTimeout(x));
   });
 </script>
-
-<style>
-  .action-icon-wrapper {
-    cursor: pointer;
-    margin-right: 10px;
-  }
-  .action-icon-wrapper::hover {
-    background-color: rgba(144, 188, 144, 0.4);
-  }
-</style>

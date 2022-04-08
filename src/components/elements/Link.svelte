@@ -1,4 +1,4 @@
-<Link target="_blank" class="link" href={element.url}>
+<Link target="_blank" style="font-size: 15px" href={element.url}>
   {element.text ?? element.url}
 </Link>
 
@@ -8,9 +8,3 @@
 
   export let element: LinkElement;
 </script>
-
-<style>
-  .link {
-    font-size: 15px;
-  }
-</style>
