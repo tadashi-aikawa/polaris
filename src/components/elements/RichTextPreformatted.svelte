@@ -17,6 +17,8 @@
     font-size: 85%;
     line-height: 16px;
     white-space: pre-wrap;
+    word-wrap: anywhere;
+    max-width: 95%;
     padding: 10px;
     margin-top: 5px;
     border-radius: 7px;

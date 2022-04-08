@@ -20,6 +20,10 @@
           </div>
           <div
             style="color: dimgrey; font-size: 90%; display: flex; align-items: center; gap: 3px">
+            <span>
+              #{attachment.channel_name} | {DateTime.of(Number(mb.ts))
+                .displayDateTime}
+            </span>
             {#if attachment.from_url}
               <TooltipIcon
                 tooltipText="Open in Slack"
@@ -31,8 +35,6 @@
                   shell.open(attachment.from_url);
                 }} />
             {/if}
-            #{attachment.channel_name} | {DateTime.of(Number(mb.ts))
-              .displayDateTime}
           </div>
         {/each}
       </div>

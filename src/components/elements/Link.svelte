@@ -1,4 +1,7 @@
-<Link target="_blank" style="font-size: 15px" href={element.url}>
+<Link
+  target="_blank"
+  style="font-size: 15px; word-wrap: anywhere"
+  href={element.url}>
   {element.text ?? element.url}
 </Link>
 

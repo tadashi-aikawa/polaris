@@ -4,7 +4,7 @@
       <CheckmarkOutline24 size="small" style="cursor: inherit" />
     </div>
 
-    <div style="padding: 15px 15px 0 0;">
+    <div style="padding: 15px 30px 0 0;">
       <MessageHeader
         userId={message.user_id}
         createdAt={message.created_at}
@@ -23,7 +23,9 @@
         {/if}
 
         {#each message.attachments ?? [] as ma}
-          <MessageAttachment attachment={ma} />
+          <div style="max-width: 90%;">
+            <MessageAttachment attachment={ma} />
+          </div>
         {/each}
       </div>
     </div>
