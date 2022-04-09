@@ -1,15 +1,15 @@
-<div style="display: flex; gap: 5px">
-  <Button
-    size="small"
-    icon={ProgressBarRound32}
-    on:click={handleClickReloadConfig}>Reload config</Button>
+<div style="display: flex; justify-content: end">
   {#each results as r}
     {#if r.loading}
       <InlineLoading description={`Search ${r.item.condition.query}...`} />
     {/if}
   {/each}
+  <Button
+    size="small"
+    icon={ProgressBarRound32}
+    on:click={handleClickReloadConfig}>Reload config</Button>
 </div>
-<div style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
+<div style="padding-top: 5px;  height: calc(100vh - 100px - 35px);">
   {#if unreadResults.length === 0}
     <div
       style="display: flex; justify-content: center; align-items: center; flex-direction: column; padding-top: 25vh">

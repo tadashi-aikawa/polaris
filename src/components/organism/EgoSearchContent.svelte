@@ -65,3 +65,13 @@
     markAsRead(event.detail);
   };
 </script>
+
+<style>
+  .messages-wrapper {
+    height: calc(100vh - 100px - 35px - 100px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 30px 0 5px;
+    max-width: 1080px;
+  }
+</style>
