@@ -17,7 +17,6 @@
 <div style="padding-top: 20px;  height: calc(100vh - 100px - 50px);">
   {#if unreadResults.length === 0}
     <div
-      transition:fade
       style="display: flex; justify-content: center; align-items: center; flex-direction: column; padding-top: 25vh">
       <img
         src="https://github.com/tadashi-aikawa/vigilancia/raw/master/src-tauri/icons/128x128@2x.png"
@@ -26,71 +25,72 @@
         There are no beneficial messages. No worries!
       </span>
     </div>
-  {/if}
-
-  <Tabs autoWidth>
-    {#each unreadResults as r}
-      <Tab>
-        <div
-          style="display: flex; align-items: center; height: 26px; padding-bottom: 10px;">
-          <span style="margin-right: 3px;">
-            {r.item.condition.title ?? r.item.condition.query}
-          </span>
-          {#if r.loading}
-            <InlineLoading />
-          {:else}
-            <Tag type={r.item.condition.color ?? "cyan"} size="sm"
-              >{unreadMessages(r.item.messages).length}</Tag>
-          {/if}
-        </div>
-      </Tab>
-    {/each}
-
-    <svelte:fragment slot="content">
-      {#each unreadResults as r, i}
-        <TabContent>
-          {#if r.error}
-            <InlineNotification title="Error" subtitle={r.error} />
-          {/if}
-          <div style="margin: 0 0 10px 15px">
-            {#each unreadMessages(r.item.messages) as message, i (message)}
-              <span style="margin: 0 2px">
-                <UserImage userId={message.user_id} size="24" />
-              </span>
-            {/each}
-
-            <TooltipIcon
-              size="small"
-              style="cursor: pointer; margin-left: 30px;"
-              tooltipText="Search by a current query"
-              on:click={() => handleClickSearchByCurrentQuery(i)}>
-              <ProgressBarRound24 style="fill: darkgreen" />
-            </TooltipIcon>
-            <TooltipIcon
-              size="small"
-              style="cursor: pointer; margin-left: 10px;"
-              tooltipText="Mark messages in this tab as read"
-              icon={CheckmarkOutline24}
-              on:click={() => handleClickMarkAsReadItem(r.item)}>
-              <CheckmarkOutline24 style="fill: orangered" />
-            </TooltipIcon>
-          </div>
+  {:else}
+    <Tabs autoWidth>
+      {#each unreadResults as r}
+        <Tab>
           <div
-            style=" height: calc(100vh - 100px - 50px - 100px); overflow-y: scroll">
-            {#each unreadMessages(r.item.messages) as message, i (message)}
-              <div
-                style="padding: 5px;"
-                animate:flip={{ duration: 500 }}
-                in:fade
-                out:fly={{ x: 100 }}>
-                <MessageCard {message} on:click:read={handleClickMarkAsRead} />
-              </div>
-            {/each}
+            style="display: flex; align-items: center; height: 26px; padding-bottom: 10px;">
+            <span style="margin-right: 3px;">
+              {r.item.condition.title ?? r.item.condition.query}
+            </span>
+            {#if r.loading}
+              <InlineLoading />
+            {:else}
+              <Tag type={r.item.condition.color ?? "cyan"} size="sm"
+                >{unreadMessages(r.item.messages).length}</Tag>
+            {/if}
           </div>
-        </TabContent>
+        </Tab>
       {/each}
-    </svelte:fragment>
-  </Tabs>
+
+      <svelte:fragment slot="content">
+        {#each unreadResults as r, i}
+          <TabContent>
+            {#if r.error}
+              <InlineNotification title="Error" subtitle={r.error} />
+            {/if}
+            <div style="margin: 0 0 10px 15px">
+              {#each unreadMessages(r.item.messages) as message, i (message)}
+                <span style="margin: 0 2px">
+                  <UserImage userId={message.user_id} size="24" />
+                </span>
+              {/each}
+
+              <TooltipIcon
+                size="small"
+                style="cursor: pointer; margin-left: 30px;"
+                tooltipText="Search by a current query"
+                on:click={() => handleClickSearchByCurrentQuery(i)}>
+                <ProgressBarRound24 style="fill: darkgreen" />
+              </TooltipIcon>
+              <TooltipIcon
+                size="small"
+                style="cursor: pointer; margin-left: 10px;"
+                tooltipText="Mark messages in this tab as read"
+                icon={CheckmarkOutline24}
+                on:click={() => handleClickMarkAsReadItem(r.item)}>
+                <CheckmarkOutline24 style="fill: orangered" />
+              </TooltipIcon>
+            </div>
+            <div class="messages-wrapper">
+              {#each unreadMessages(r.item.messages) as message, i (message)}
+                <div
+                  style="padding: 5px;"
+                  animate:flip={{ duration: 500 }}
+                  in:fade
+                  out:fly={{ x: 100 }}>
+                  <MessageCard
+                    {message}
+                    on:click:read={handleClickMarkAsRead} />
+                </div>
+              {/each}
+            </div>
+          </TabContent>
+        {/each}
+      </svelte:fragment>
+    </Tabs>
+  {/if}
 </div>
 
 <script lang="ts">
@@ -262,3 +262,13 @@
     timeoutHandlers.forEach((x) => window.clearTimeout(x));
   });
 </script>
+
+<style>
+  .messages-wrapper {
+    height: calc(100vh - 100px - 50px - 100px);
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding: 0 30px 0 5px;
+    max-width: 1080px;
+  }
+</style>
