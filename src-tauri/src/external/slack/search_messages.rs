@@ -134,7 +134,7 @@ pub enum Element {
     #[serde(rename = "rich_text_preformatted")]
     RichTextPreformatted { border: i64, elements: Vec<Element> },
     #[serde(rename = "emoji")]
-    Emoji { name: String },
+    Emoji { name: String, style: Option<Style> },
     #[serde(rename = "text")]
     Text { text: String, style: Option<Style> },
     #[serde(rename = "link")]
@@ -156,6 +156,7 @@ pub enum Element {
 pub struct Style {
     code: Option<bool>,
     bold: Option<bool>,
+    strike: Option<bool>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

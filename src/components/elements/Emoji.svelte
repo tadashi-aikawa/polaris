@@ -2,6 +2,7 @@
   {#if emojiUrl.startsWith("alias:")}
     <img
       src={$emojiMap[emojiUrl.replace("alias:", "")]}
+      class:strike={element.style?.strike}
       style="vertical-align: middle"
       width="24px"
       height="24px"
@@ -9,6 +10,7 @@
   {:else}
     <img
       src={emojiUrl}
+      class:strike={element.style?.strike}
       style="vertical-align: middle"
       width="24px"
       height="24px"
@@ -28,3 +30,9 @@
   $: emojiName = element.name;
   $: emojiUrl = $emojiMap[emojiName];
 </script>
+
+<style>
+  .strike {
+    text-decoration: line-through;
+  }
+</style>

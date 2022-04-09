@@ -1,8 +1,9 @@
 <span
   class="broadcast"
   class:bold={element.style?.bold}
-  class:code={element.style?.code}>
-  @{element.range}
+  class:code={element.style?.code}
+  class:strike={element.style?.strike}>
+  @{element.range}>
 </span>
 
 <script lang="ts">
@@ -19,6 +20,9 @@
   }
   .bold {
     font-weight: bold;
+  }
+  .strike {
+    text-decoration: line-through;
   }
   .code {
     color: #c7254e;

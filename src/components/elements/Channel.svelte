@@ -1,7 +1,8 @@
 <span
   class="channel"
   class:bold={element.style?.bold}
-  class:code={element.style?.code}>
+  class:code={element.style?.code}
+  class:strike={element.style?.strike}>
   #{element.channel_id}
   <!--    TODO: channel名を表示-->
 </span>
@@ -20,6 +21,9 @@
   }
   .bold {
     font-weight: bold;
+  }
+  .strike {
+    text-decoration: line-through;
   }
   .code {
     color: #c7254e;

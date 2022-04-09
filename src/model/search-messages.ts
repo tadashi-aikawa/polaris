@@ -87,6 +87,7 @@ export type RichTextPreformattedElement = {
 export type EmojiElement = {
   type: "emoji";
   name: string;
+  style: Nullable<Style>;
 };
 
 export type TextElement = {
@@ -126,4 +127,5 @@ export type ChannelElement = {
 export interface Style {
   code: Nullable<boolean>;
   bold: Nullable<boolean>;
+  strike: Nullable<boolean>;
 }

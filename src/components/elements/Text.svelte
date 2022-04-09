@@ -1,7 +1,8 @@
 <span
   class="text"
   class:bold={element.style?.bold}
-  class:code={element.style?.code}>
+  class:code={element.style?.code}
+  class:strike={element.style?.strike}>
   {element.text}
 </span>
 
@@ -18,6 +19,9 @@
   }
   .bold {
     font-weight: bold;
+  }
+  .strike {
+    text-decoration: line-through;
   }
   .code {
     color: #c7254e;
