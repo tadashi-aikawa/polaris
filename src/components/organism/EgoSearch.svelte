@@ -1,10 +1,5 @@
 <div style="display: flex; gap: 5px">
   <Button
-    kind="danger"
-    size="small"
-    icon={CheckmarkOutline32}
-    on:click={handleClickMarkAsReadAll}>Mark all as read</Button>
-  <Button
     size="small"
     icon={ProgressBarRound32}
     on:click={handleClickReloadConfig}>Reload config</Button>
@@ -46,47 +41,9 @@
 
       <svelte:fragment slot="content">
         {#each unreadResults as r, i}
-          <TabContent>
-            {#if r.error}
-              <InlineNotification title="Error" subtitle={r.error} />
-            {/if}
-            <div style="margin: 0 0 10px 15px">
-              {#each unreadMessages(r.item.messages) as message, i (message)}
-                <span style="margin: 0 2px">
-                  <UserImage userId={message.user_id} size="24" />
-                </span>
-              {/each}
-
-              <TooltipIcon
-                size="small"
-                style="cursor: pointer; margin-left: 30px;"
-                tooltipText="Search by a current query"
-                on:click={() => handleClickSearchByCurrentQuery(i)}>
-                <ProgressBarRound24 style="fill: darkgreen" />
-              </TooltipIcon>
-              <TooltipIcon
-                size="small"
-                style="cursor: pointer; margin-left: 10px;"
-                tooltipText="Mark messages in this tab as read"
-                icon={CheckmarkOutline24}
-                on:click={() => handleClickMarkAsReadItem(r.item)}>
-                <CheckmarkOutline24 style="fill: orangered" />
-              </TooltipIcon>
-            </div>
-            <div class="messages-wrapper">
-              {#each unreadMessages(r.item.messages) as message, i (message)}
-                <div
-                  style="padding: 5px;"
-                  animate:flip={{ duration: 500 }}
-                  in:fade
-                  out:fly={{ x: 100 }}>
-                  <MessageCard
-                    {message}
-                    on:click:read={handleClickMarkAsRead} />
-                </div>
-              {/each}
-            </div>
-          </TabContent>
+          <EgoSearchContent
+            messages={unreadMessages(r.item.messages)}
+            error={r.error} />
         {/each}
       </svelte:fragment>
     </Tabs>
@@ -96,11 +53,8 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/tauri";
   import {
-    TooltipIcon,
     Button,
-    InlineNotification,
     Tab,
-    TabContent,
     Tabs,
     Tag,
     InlineLoading,
@@ -108,30 +62,13 @@
 
   import { Message, Response } from "~/model/search-messages";
   import { Response as Config, Condition } from "~/model/fetch-config";
-  import MessageCard from "~/components/molecules/MessageCard.svelte";
-  import UserImage from "~/components/atoms/UserImage.svelte";
-  import {
-    ProgressBarRound24,
-    ProgressBarRound32,
-    CheckmarkOutline24,
-    CheckmarkOutline32,
-  } from "carbon-icons-svelte";
+  import { ProgressBarRound32 } from "carbon-icons-svelte";
   import { DateTime, Nullable } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
   import { onDestroy, onMount } from "svelte";
-  import { fade, fly } from "svelte/transition";
-  import { flip } from "svelte/animate";
-
-  type Item = {
-    condition: Condition;
-    messages: Message[];
-    lastSearchDate?: DateTime;
-  };
-  type LiquidValue = {
-    item: Item;
-    loading: boolean;
-    error: Nullable<string>;
-  };
+  import type { EgoSearchItem, EgoSearchLiquidValue } from "~/model/EgoSearch";
+  import EgoSearchContent from "~/components/organism/EgoSearchContent.svelte";
+  import { readById } from "~/stores";
 
   let config: Config = {
     interval_sec: 60 * 10,
@@ -139,35 +76,16 @@
     since_day_ago: null,
   };
 
-  let readById: { [messageId: string]: DateTime } = {};
   let lastMessageIdByQuery: { [query: string]: Nullable<Message["id"]> } = {};
-  let results: LiquidValue[] = [];
+  let results: EgoSearchLiquidValue[] = [];
 
   $: unreadMessages = (messages: Message[]) =>
-    messages.filter((x) => !readById[x.id]);
+    messages.filter((x) => !$readById[x.id]);
   $: unreadResults = results.filter(
     (x) => unreadMessages(x.item.messages).length > 0 || x.error
   );
 
-  const markAsRead = async (message: Message) => {
-    readById[message.id] = DateTime.now();
-  };
-  const markAsReadItem = async (item: Item) => {
-    unreadMessages(item.messages).forEach(markAsRead);
-  };
-
-  const handleClickMarkAsRead = (event: CustomEvent<Message>) => {
-    markAsRead(event.detail);
-  };
-
-  const handleClickMarkAsReadItem = (item: Item) => {
-    markAsReadItem(item);
-  };
-  const handleClickMarkAsReadAll = async () => {
-    results.map((x) => x.item).forEach(markAsReadItem);
-  };
-
-  const searchItem = async (condition: Condition): Promise<Item> => {
+  const searchItem = async (condition: Condition): Promise<EgoSearchItem> => {
     return invoke<Response>("search_messages", {
       query: `${condition.query} after:${
         DateTime.today().minusDays(1 + config.since_day_ago ?? 1).displayDate
@@ -195,7 +113,7 @@
         condition.should_notify &&
         !suppressNotify &&
         lastMessageIdByQuery[condition.query] !== latestMessageId &&
-        !readById[latestMessageId]
+        !$readById[latestMessageId]
       ) {
         sendNotification(
           `"${condition.query}" に関する新しいメッセージを見つけました🦋`
@@ -206,10 +124,6 @@
       results[i].error = e;
     }
     results[i].loading = false;
-  };
-
-  const handleClickSearchByCurrentQuery = async (i: number) => {
-    await search(i, false);
   };
 
   const loadConfig = async () => {
@@ -262,13 +176,3 @@
     timeoutHandlers.forEach((x) => window.clearTimeout(x));
   });
 </script>
-
-<style>
-  .messages-wrapper {
-    height: calc(100vh - 100px - 50px - 100px);
-    overflow-y: scroll;
-    overflow-x: hidden;
-    padding: 0 30px 0 5px;
-    max-width: 1080px;
-  }
-</style>
