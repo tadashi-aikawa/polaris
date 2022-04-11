@@ -1,54 +1,43 @@
-<TabContent>
-  {#if error}
-    <InlineNotification title="Error" subtitle={error} />
-  {/if}
-  <div style="margin: 0 0 10px 15px">
-    {#each messages as message, i (message)}
-      <span style="margin: 0 2px">
-        <UserImage userId={message.user_id} size="24" />
-      </span>
-    {/each}
+<div style="margin: 0 0 10px 15px">
+  {#each messages as message, i (message)}
+    <span style="margin: 0 2px">
+      <UserImage userId={message.user_id} size="24" />
+    </span>
+  {/each}
 
-    <TooltipIcon
-      size="small"
-      style="cursor: pointer; margin-left: 10px;"
-      tooltipText="Mark messages in this tab as read"
-      icon={CheckmarkOutline24}
-      on:click={markAsReadMessages}>
-      <CheckmarkOutline24 style="fill: orangered" />
-    </TooltipIcon>
-  </div>
-  <div class="messages-wrapper">
-    {#each messages as message, i (message)}
-      <div
-        style="padding: 5px;"
-        animate:flip={{ duration: 500 }}
-        in:fade
-        out:fly={{ x: 100 }}>
-        <MessageCard {message} on:click:read={handleClickMarkAsRead} />
-      </div>
-    {/each}
-  </div>
-</TabContent>
+  <TooltipIcon
+    size="small"
+    style="cursor: pointer; margin-left: 10px;"
+    tooltipText="Mark messages in this tab as read"
+    icon={CheckmarkOutline24}
+    on:click={markAsReadMessages}>
+    <CheckmarkOutline24 style="fill: orangered" />
+  </TooltipIcon>
+</div>
+<div class="messages-wrapper">
+  {#each messages as message, i (message)}
+    <div
+      style="padding: 5px;"
+      animate:flip={{ duration: 500 }}
+      in:fade
+      out:fly={{ x: 100 }}>
+      <MessageCard {message} on:click:read={handleClickMarkAsRead} />
+    </div>
+  {/each}
+</div>
 
 <script lang="ts">
-  import {
-    InlineNotification,
-    TabContent,
-    TooltipIcon,
-  } from "carbon-components-svelte";
+  import { TooltipIcon } from "carbon-components-svelte";
   import UserImage from "~/components/atoms/UserImage.svelte";
   import { CheckmarkOutline24 } from "carbon-icons-svelte";
   import MessageCard from "~/components/molecules/MessageCard.svelte";
   import { Message } from "~/model/search-messages";
   import { fade, fly } from "svelte/transition";
   import { flip } from "svelte/animate";
-  import type { Nullable } from "owlelia";
   import { DateTime } from "owlelia";
   import { readById } from "~/stores";
   import { sleep } from "~/utils/time";
 
-  export let error: Nullable<string> = null;
   export let messages: Message[];
 
   const markAsRead = async (message: Message) => {

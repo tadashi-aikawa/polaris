@@ -31,6 +31,8 @@
             </span>
             {#if r.loading}
               <InlineLoading />
+            {:else if r.error}
+              <Error16 style="color: red" />
             {:else}
               <Tag type={r.item.condition.color ?? "cyan"} size="sm"
                 >{unreadMessages(r.item.messages).length}</Tag>
@@ -41,9 +43,18 @@
 
       <svelte:fragment slot="content">
         {#each unreadResults as r, i}
-          <EgoSearchContent
-            messages={unreadMessages(r.item.messages)}
-            error={r.error} />
+          <TabContent>
+            {#if r.error}
+              <InlineNotification title="Error" subtitle={r.error}>
+                <svelte:fragment slot="actions">
+                  <NotificationActionButton on:click={() => reSearch(r)}
+                    >Reload</NotificationActionButton>
+                </svelte:fragment>
+              </InlineNotification>
+            {:else}
+              <EgoSearchContent messages={unreadMessages(r.item.messages)} />
+            {/if}
+          </TabContent>
         {/each}
       </svelte:fragment>
     </Tabs>
@@ -58,11 +69,14 @@
     Tabs,
     Tag,
     InlineLoading,
+    InlineNotification,
+    TabContent,
+    NotificationActionButton,
   } from "carbon-components-svelte";
 
   import { Message, Response } from "~/model/search-messages";
   import { Response as Config, Condition } from "~/model/fetch-config";
-  import { ProgressBarRound32 } from "carbon-icons-svelte";
+  import { ProgressBarRound32, Error16 } from "carbon-icons-svelte";
   import { DateTime, Nullable } from "owlelia";
   import { sendNotification } from "@tauri-apps/api/notification";
   import { onDestroy, onMount } from "svelte";
@@ -106,6 +120,7 @@
       const condition = results[i].item.condition;
       const item = await searchItem(condition);
       results[i].item = item;
+      results[i].error = null;
 
       const latestMessageId = item.messages?.[0]?.id;
       // noinspection OverlyComplexBooleanExpressionJS
@@ -124,6 +139,13 @@
       results[i].error = e;
     }
     results[i].loading = false;
+  };
+
+  const reSearch = async (result: EgoSearchLiquidValue) => {
+    await search(
+      results.findIndex((x) => x === result),
+      true
+    );
   };
 
   const loadConfig = async () => {
