@@ -12,5 +12,5 @@
   export let userId: Nullable<string> = null;
   export let size: number = 48;
 
-  $: user = user ? user : $userMap[userId];
+  $: user = user ? user : userMap.getUserById(userId!);
 </script>

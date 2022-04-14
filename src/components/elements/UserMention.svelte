@@ -10,7 +10,7 @@
 
   export let element: UserElement;
 
-  $: user = $userMap[element.user_id];
+  $: user = userMap.getUserById(element.user_id);
 </script>
 
 <style>

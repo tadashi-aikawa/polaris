@@ -40,5 +40,5 @@
   export let permalink: string;
 
   $: displayedCreatedAt = DateTime.of(createdAt).displayDateTime;
-  $: user = $userMap[userId];
+  $: user = userMap.getUserById(userId);
 </script>
