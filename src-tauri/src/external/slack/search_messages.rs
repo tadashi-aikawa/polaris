@@ -132,7 +132,10 @@ pub enum Element {
         elements: Vec<Element>,
     },
     #[serde(rename = "rich_text_preformatted")]
-    RichTextPreformatted { border: i64, elements: Vec<Element> },
+    RichTextPreformatted {
+        elements: Vec<Element>,
+        border: Option<i64>,
+    },
     #[serde(rename = "emoji")]
     Emoji { name: String, style: Option<Style> },
     #[serde(rename = "text")]

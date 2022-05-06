@@ -80,7 +80,7 @@ export type RichTextListElement = {
 
 export type RichTextPreformattedElement = {
   type: "rich_text_preformatted";
-  border: number;
+  border?: number;
   elements: Element[];
 };
 
